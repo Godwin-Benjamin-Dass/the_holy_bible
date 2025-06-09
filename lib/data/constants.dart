@@ -23,6 +23,7 @@ String totalVerse = "மொத்த வசனங்கள்";
 String searchVerse = "தேடல் வசனம்";
 String ended = "முடிந்தது";
 String addToBookmark = "புத்தகக் குறியில் புத்தகக் குறியில்";
+String recentVerse = "சமீபத்திய வசனம்";
 
 String getBookName(int bookNumber) {
   switch (bookNumber) {

@@ -9,6 +9,7 @@ import 'package:holy_bible_tamil/models/verse_model.dart';
 import 'package:holy_bible_tamil/provider/books_provider.dart';
 import 'package:holy_bible_tamil/provider/verse_provider.dart';
 import 'package:holy_bible_tamil/screens/bible/book_page.dart';
+import 'package:holy_bible_tamil/screens/bible/recent_viewed_verse_page.dart';
 import 'package:holy_bible_tamil/screens/bible/search_page.dart';
 import 'package:holy_bible_tamil/screens/bible/verse_page.dart';
 import 'package:holy_bible_tamil/screens/book_mark/book_marks.dart';
@@ -41,6 +42,7 @@ class _HomePageState extends State<HomePage> {
             .setverse(context);
       }
     });
+    getBookName(1);
   }
 
   @override
@@ -91,9 +93,11 @@ class _HomePageState extends State<HomePage> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => VersePage(
-                                    isFromHome: true,
-                                    book: data["book"],
-                                    chapter: data["chapter"])));
+                                      isFromHome: true,
+                                      book: data["book"],
+                                      chapter: data["chapter"],
+                                      verseNo: data["verse"],
+                                    )));
                       }
                     },
                     title: continueReadingName,
@@ -290,6 +294,13 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => RecentlyViewVersePage()));
+        },
+        child: Icon(Icons.history),
       ),
     );
   }

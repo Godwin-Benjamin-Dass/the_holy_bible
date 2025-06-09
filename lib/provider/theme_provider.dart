@@ -17,6 +17,7 @@ class ThemeProvider extends ChangeNotifier {
   double get fontSize => _fontSize;
 
   setFontSize(double value) {
+    if (value < 10 || value > 30) return;
     _fontSize = value;
     notifyListeners();
     ThemeService.setFont(value);

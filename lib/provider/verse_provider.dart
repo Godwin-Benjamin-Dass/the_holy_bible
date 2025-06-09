@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:holy_bible_tamil/models/books_model.dart';
 import 'package:holy_bible_tamil/models/verse_model.dart';
 
 class VerseProvider extends ChangeNotifier {
@@ -34,11 +36,35 @@ class VerseProvider extends ChangeNotifier {
   List<VerseModel> get searchVerse => _searchVerse;
 
   Future filterSearchResults(String query) async {
-    _searchVerse = allVerse
-        .where((item) =>
-            item.verse.toString().toLowerCase().contains(query.toLowerCase()))
-        .toList();
+    _searchVerse =
+        allVerse.where((item) => item.verse!.contains(query)).toList();
 
+    notifyListeners();
+  }
+
+  List _recentlyViewedVerse = [];
+  List get recentlyViewedVerse => _recentlyViewedVerse;
+
+  addRecentVerse(BooksModel book, int chapter, int? verse) {
+    int idx = -1;
+    for (int i = 0; i < _recentlyViewedVerse.length; i++) {
+      if (_recentlyViewedVerse[i]["book"].name == book.name) {
+        log("stage 1");
+        if (_recentlyViewedVerse[i]["chapter"] == chapter) {
+          log("stage 2");
+          if (_recentlyViewedVerse[i]["verse"] == (verse ?? 1)) {
+            log("stage 3");
+            idx = i;
+          }
+        }
+      }
+    }
+    log(idx.toString());
+    if (idx != -1) {
+      _recentlyViewedVerse.removeAt(idx);
+    }
+    _recentlyViewedVerse
+        .add({"book": book, "chapter": chapter, "verse": verse ?? 1});
     notifyListeners();
   }
 }

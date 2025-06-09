@@ -19,6 +19,8 @@ import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 import '../../provider/books_provider.dart';
 
+bool isFirstTime = true;
+
 class VersePage extends StatefulWidget {
   const VersePage(
       {super.key,
@@ -44,22 +46,29 @@ class _VersePageState extends State<VersePage> {
 
   getVerse() async {
     chapter = widget.chapter;
-    Future.delayed(Duration.zero, () {
-      Provider.of<VerseProvider>(context, listen: false).getVerses(
+    Future.delayed(isFirstTime ? Duration(seconds: 1) : Duration.zero,
+        () async {
+      await Provider.of<VerseProvider>(context, listen: false).getVerses(
           bookNo: widget.book.bookNo!,
           chapterNo: widget.chapter,
           context: context);
-    });
+      isFirstTime = false;
+    }).then((val) async {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToItem();
+      });
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToItem();
+      await ContinueReadingService.setData(
+          book: widget.book,
+          chapter: chapter,
+          verse: widget.verseNo,
+          context: context);
+      for (var vm in Provider.of<VerseProvider>(context, listen: false).verse) {
+        vm.isSelected = false;
+      }
+      copyVerse.clear();
+      setState(() {});
     });
-    await ContinueReadingService.setData(book: widget.book, chapter: chapter);
-    for (var vm in Provider.of<VerseProvider>(context, listen: false).verse) {
-      vm.isSelected = false;
-    }
-    copyVerse.clear();
-    setState(() {});
   }
 
   _scrollToItem() {
@@ -302,100 +311,99 @@ class _VersePageState extends State<VersePage> {
       body: WillPopScope(
         onWillPop: _willPopCallback,
         child: Consumer<VerseProvider>(
-          builder: (context, verse, child) => GestureDetector(
-            onScaleStart: (details) {
-              _baseScaleFactor =
-                  Provider.of<ThemeProvider>(context, listen: false).fontSize;
-            },
-            onScaleUpdate: (details) {
-              Provider.of<ThemeProvider>(context, listen: false)
-                  .setFontSize(_baseScaleFactor * details.scale);
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: ScrollablePositionedList.builder(
-                itemScrollController: _scrollController,
-                itemCount: verse.verse.length,
-                itemBuilder: (context, i) {
-                  VerseModel vm = verse.verse[i];
-                  return InkWell(
-                    onTap: () {
-                      vm.isSelected = !vm.isSelected!;
-                      if (vm.isSelected!) {
-                        copyVerse.add(vm);
-                      } else {
-                        copyVerse.remove(vm);
-                      }
-                      setState(() {});
-                    },
-                    onLongPress: () async {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          title: Text(howCanIhelpYou),
-                          content: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              InkWell(
-                                onTap: () async {
-                                  await Clipboard.setData(ClipboardData(
-                                          text:
-                                              "${vm.verse!} ${widget.book.name} ${vm.chapter!}:${vm.verseNo!}"))
-                                      .then((value) {
-                                    Navigator.pop(context);
-                                  });
-                                },
-                                child: Text(copy),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  BookMarkService.addBookMark(vm).then((value) {
-                                    Navigator.pop(context);
-                                  });
-                                },
-                                child: Text(addToBookMark),
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              InkWell(
-                                onTap: () {
+          builder: (context, verse, child) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: ScrollablePositionedList.builder(
+              itemScrollController: _scrollController,
+              itemCount: verse.verse.length,
+              itemBuilder: (context, i) {
+                VerseModel vm = verse.verse[i];
+                return GestureDetector(
+                  onScaleStart: (details) {
+                    _baseScaleFactor =
+                        Provider.of<ThemeProvider>(context, listen: false)
+                            .fontSize;
+                  },
+                  onScaleUpdate: (details) {
+                    Provider.of<ThemeProvider>(context, listen: false)
+                        .setFontSize(_baseScaleFactor * details.scale);
+                  },
+                  onTap: () {
+                    vm.isSelected = !vm.isSelected!;
+                    if (vm.isSelected!) {
+                      copyVerse.add(vm);
+                    } else {
+                      copyVerse.remove(vm);
+                    }
+                    setState(() {});
+                  },
+                  onLongPress: () async {
+                    showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        // title: Text(howCanIhelpYou),
+                        content: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                await Clipboard.setData(ClipboardData(
+                                        text:
+                                            "${vm.verse!} ${widget.book.name} ${vm.chapter!}:${vm.verseNo!}"))
+                                    .then((value) {
                                   Navigator.pop(context);
-                                },
-                                child: Text(close),
-                              ),
-                            ],
-                          ),
+                                });
+                              },
+                              child: Text(copy),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            InkWell(
+                              onTap: () {
+                                BookMarkService.addBookMark(vm).then((value) {
+                                  Navigator.pop(context);
+                                });
+                              },
+                              child: Text(addToBookMark),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text(close),
+                            ),
+                          ],
                         ),
-                      );
-                    },
-                    child: Card(
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                                color: Provider.of<ThemeProvider>(context,
-                                            listen: false)
-                                        .isDarkMode
-                                    ? Colors.white
-                                    : Colors.black)),
-                        child: ListTile(
-                          title: Text(
-                            vm.verseNo.toString() + ") " + vm.verse!,
-                            style: TextStyle(
-                                color: vm.isSelected! ? Colors.orange : null,
-                                fontWeight: FontWeight.bold),
-                          ),
+                      ),
+                    );
+                  },
+                  child: Card(
+                    child: Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                              color: Provider.of<ThemeProvider>(context,
+                                          listen: false)
+                                      .isDarkMode
+                                  ? Colors.white
+                                  : Colors.black)),
+                      child: ListTile(
+                        title: Text(
+                          vm.verseNo.toString() + ") " + vm.verse!,
+                          style: TextStyle(
+                              color: vm.isSelected! ? Colors.orange : null,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
           ),
         ),

@@ -114,121 +114,114 @@ class _BookMarksState extends State<BookMarks> {
                       fontWeight: FontWeight.bold, fontSize: 19),
                 ),
               )
-            : GestureDetector(
-                onScaleStart: (details) {
-                  _baseScaleFactor =
+            : ListView.builder(
+                itemCount: bookMarks.length,
+                itemBuilder: (ctx, i) {
+                  VerseModel vm = VerseModel.fromJson(bookMarks[i]["verse"]);
+                  return GestureDetector(
+                    onScaleStart: (details) {
+                      _baseScaleFactor =
+                          Provider.of<ThemeProvider>(context, listen: false)
+                              .fontSize;
+                    },
+                    onScaleUpdate: (details) {
                       Provider.of<ThemeProvider>(context, listen: false)
-                          .fontSize;
-                },
-                onScaleUpdate: (details) {
-                  Provider.of<ThemeProvider>(context, listen: false)
-                      .setFontSize(_baseScaleFactor * details.scale);
-                },
-                child: ListView.builder(
-                    itemCount: bookMarks.length,
-                    itemBuilder: (ctx, i) {
-                      VerseModel vm =
-                          VerseModel.fromJson(bookMarks[i]["verse"]);
-                      return InkWell(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              title: Text(howCanIhelpYou),
-                              content: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  InkWell(
-                                    onTap: () async {
-                                      await Clipboard.setData(ClipboardData(
-                                              text:
-                                                  "${vm.verse!} ${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}"))
-                                          .then((value) {
-                                        Navigator.pop(context);
-                                      });
-                                    },
-                                    child: Text(copy),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => VersePage(
-                                                    book: BooksModel(
-                                                        bookNo: vm.book,
-                                                        name: getBookName(
-                                                            vm.book!),
-                                                        noOfBooks: bibleBooks[
-                                                            getBookName(
-                                                                vm.book!)]),
-                                                    chapter: vm.chapter!,
-                                                    verseNo: vm.verseNo,
-                                                  )));
-                                    },
-                                    child: Text(gotoVerse),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  InkWell(
-                                    onTap: () async {
-                                      await BookMarkService.removeBookMark(vm)
-                                          .then((value) {
-                                        getData();
-                                        Navigator.pop(context);
-                                      });
-                                    },
-                                    child: Text(remove),
-                                  ),
-                                ],
+                          .setFontSize(_baseScaleFactor * details.scale);
+                    },
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: Text(howCanIhelpYou),
+                          content: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              InkWell(
+                                onTap: () async {
+                                  await Clipboard.setData(ClipboardData(
+                                          text:
+                                              "${vm.verse!} ${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}"))
+                                      .then((value) {
+                                    Navigator.pop(context);
+                                  });
+                                },
+                                child: Text(copy),
                               ),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                    color: Provider.of<ThemeProvider>(context,
-                                                listen: false)
-                                            .isDarkMode
-                                        ? Colors.white
-                                        : Colors.black)),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: Text(
-                                    vm.verse!,
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                Text(
-                                  "${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 15),
-                                ),
-                                Text(bookMarks[i]["time"]
-                                    .toString()
-                                    .substring(00, 10)),
-                                const SizedBox(
-                                  height: 10,
-                                )
-                              ],
-                            ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => VersePage(
+                                                book: BooksModel(
+                                                    bookNo: vm.book,
+                                                    name: getBookName(vm.book!),
+                                                    noOfBooks: bibleBooks[
+                                                        getBookName(vm.book!)]),
+                                                chapter: vm.chapter!,
+                                                verseNo: vm.verseNo,
+                                              )));
+                                },
+                                child: Text(gotoVerse),
+                              ),
+                              SizedBox(
+                                height: 10,
+                              ),
+                              InkWell(
+                                onTap: () async {
+                                  await BookMarkService.removeBookMark(vm)
+                                      .then((value) {
+                                    getData();
+                                    Navigator.pop(context);
+                                  });
+                                },
+                                child: Text(remove),
+                              ),
+                            ],
                           ),
                         ),
                       );
-                    }),
-              ),
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: Provider.of<ThemeProvider>(context,
+                                            listen: false)
+                                        .isDarkMode
+                                    ? Colors.white
+                                    : Colors.black)),
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text(
+                                vm.verse!,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            Text(
+                              "${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            Text(bookMarks[i]["time"]
+                                .toString()
+                                .substring(00, 10)),
+                            const SizedBox(
+                              height: 10,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
       ),
     );
   }
