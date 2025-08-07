@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:holy_bible_tamil/data/constants.dart';
 import 'package:holy_bible_tamil/models/books_model.dart';
@@ -187,10 +188,13 @@ class HomeTile extends StatelessWidget {
         child: Card(
           child: Container(
             alignment: Alignment.center,
-            child: Text(
+            child: AutoSizeText(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
+              maxFontSize: 14,
             ),
           ),
         ),

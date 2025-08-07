@@ -222,6 +222,7 @@ class _VersePageState extends State<VersePage> {
             builder: (context, verse, child) => Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: SwipeableVerseCard(
+                isSwipable: !widget.isFromnotes,
                 onSwipeLeft: () => nextChapter(),
                 onSwipeRight: () => previousChapter(),
                 child: ScrollablePositionedList.builder(
@@ -632,30 +633,35 @@ class _VersePageState extends State<VersePage> {
                         )),
                   ),
                   Spacer(),
-                  IconButton(
-                      onPressed: () => _key.currentState!.openDrawer(),
-                      icon: Icon(
-                        Icons.view_list,
-                        size: 30,
-                      )),
-                  IconButton(
-                      onPressed: () => previousChapter(),
-                      icon: Icon(Icons.arrow_back_ios_new_rounded)),
-                  IconButton(
-                      onPressed: () => nextChapter(),
-                      icon: Icon(Icons.arrow_forward_ios_rounded)),
+                  if (widget.isFromnotes == false)
+                    IconButton(
+                        onPressed: () => _key.currentState!.openDrawer(),
+                        icon: Icon(
+                          Icons.view_list,
+                          size: 30,
+                        )),
+                  if (widget.isFromnotes == false)
+                    IconButton(
+                        onPressed: () => previousChapter(),
+                        icon: Icon(Icons.arrow_back_ios_new_rounded)),
+                  if (widget.isFromnotes == false)
+                    IconButton(
+                        onPressed: () => nextChapter(),
+                        icon: Icon(Icons.arrow_forward_ios_rounded)),
                 ],
               ),
               Row(
                 children: [
-                  IconButton(
-                      onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HomePage()),
-                            (_) => false);
-                      },
-                      icon: Icon(Icons.home)),
+                  if (widget.isFromnotes == false)
+                    IconButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const HomePage()),
+                              (_) => false);
+                        },
+                        icon: Icon(Icons.home)),
                   IconButton(
                       onPressed: () {
                         showModalBottomSheet<void>(

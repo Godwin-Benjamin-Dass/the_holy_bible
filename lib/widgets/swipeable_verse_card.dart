@@ -4,12 +4,14 @@ class SwipeableVerseCard extends StatefulWidget {
   final Widget child;
   final VoidCallback onSwipeLeft;
   final VoidCallback onSwipeRight;
+  final bool isSwipable;
 
   const SwipeableVerseCard({
     required this.child,
     required this.onSwipeLeft,
     required this.onSwipeRight,
     Key? key,
+    this.isSwipable = true,
   }) : super(key: key);
 
   @override
@@ -48,11 +50,17 @@ class _SwipeableVerseCardState extends State<SwipeableVerseCard> {
         // Foreground draggable card
         GestureDetector(
           onHorizontalDragUpdate: (details) {
+            if (widget.isSwipable == false) {
+              return;
+            }
             setState(() {
               _dragOffset += details.delta.dx;
             });
           },
           onHorizontalDragEnd: (details) {
+            if (widget.isSwipable == false) {
+              return;
+            }
             if (details.primaryVelocity != null) {
               if (details.primaryVelocity! > 0) {
                 widget.onSwipeRight();
