@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:holy_bible_tamil/data/constants.dart';
 import 'package:holy_bible_tamil/models/books_model.dart';
@@ -31,76 +32,257 @@ class _SearchPageState extends State<SearchPage> {
 
   TextEditingController searchQuery = TextEditingController();
   double _baseScaleFactor = 1.0;
-
+  String searchLanguage = 'tamil';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(searchName), actions: [
-          IconButton(
-              onPressed: () {
-                showModalBottomSheet<void>(
-                  context: context,
-                  isScrollControlled: false,
-                  builder: (BuildContext context) {
-                    return Consumer<ThemeProvider>(
-                      builder: (context, theme, child) => SizedBox(
-                        height: 200,
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  Text(
-                                    fontsSize,
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: theme.fontSize),
-                                  ),
-                                  SfSlider(
-                                      min: 10,
-                                      max: 30,
-                                      value: theme.fontSize,
-                                      onChanged: ((val) {
-                                        theme.setFontSize(val);
-                                      })),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        darkTheme,
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                      const Spacer(),
-                                      Switch(
-                                          value: theme.isDarkMode,
-                                          onChanged: ((val) {
-                                            theme.toggleTheme();
-                                          }))
-                                    ],
-                                  )
-                                ],
+        appBar: PreferredSize(
+            preferredSize: Size(double.infinity, 70),
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    children: [
+                      BackButton(),
+                      Tooltip(
+                          message:
+                              Provider.of<ThemeProvider>(context, listen: true)
+                                  .searchName,
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width * .6,
+                            child: AutoSizeText(
+                              Provider.of<ThemeProvider>(context, listen: true)
+                                  .searchName,
+                              maxFontSize: 17,
+                              minFontSize: 17,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-              icon: const Icon(Icons.settings)),
-          IconButton(
-              onPressed: () {
-                Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
-                    (route) => false);
-              },
-              icon: const Icon(Icons.home))
-        ]),
+                          )),
+                      Spacer(),
+                      IconButton(
+                          onPressed: () {
+                            showModalBottomSheet<void>(
+                              context: context,
+                              isScrollControlled: false,
+                              builder: (BuildContext context) {
+                                return SizedBox(
+                                  height: 300,
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: SingleChildScrollView(
+                                        physics: BouncingScrollPhysics(),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Text(
+                                              Provider.of<ThemeProvider>(
+                                                      context,
+                                                      listen: true)
+                                                  .fontsSize,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: Provider.of<
+                                                              ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .fontSize),
+                                            ),
+                                            SfSlider(
+                                                min: 10,
+                                                max: 30,
+                                                value:
+                                                    Provider.of<ThemeProvider>(
+                                                            context,
+                                                            listen: true)
+                                                        .fontSize,
+                                                onChanged: ((val) {
+                                                  Provider.of<ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .setFontSize(val);
+                                                })),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  Provider.of<ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .darkTheme,
+                                                  style: const TextStyle(
+                                                      fontSize: 15),
+                                                ),
+                                                const Spacer(),
+                                                Switch(
+                                                    value: Provider.of<
+                                                                ThemeProvider>(
+                                                            context,
+                                                            listen: true)
+                                                        .isDarkMode,
+                                                    onChanged: ((val) {
+                                                      Provider.of<ThemeProvider>(
+                                                              context,
+                                                              listen: true)
+                                                          .toggleTheme();
+                                                    }))
+                                              ],
+                                            ),
+                                            Text(
+                                              'Select format',
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: Provider.of<
+                                                              ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .fontSize),
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                Provider.of<ThemeProvider>(
+                                                        context,
+                                                        listen: true)
+                                                    .setFormat('tamilEnglish');
+                                              },
+                                              leading: Radio(
+                                                  value: 'tamilEnglish',
+                                                  groupValue: Provider.of<
+                                                              ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .format,
+                                                  onChanged: (val) {
+                                                    Provider.of<ThemeProvider>(
+                                                            context,
+                                                            listen: true)
+                                                        .setFormat(val!);
+                                                  }),
+                                              title: Text(
+                                                'Tamil followed by English',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                Provider.of<ThemeProvider>(
+                                                        context,
+                                                        listen: true)
+                                                    .setFormat('englishTamil');
+                                              },
+                                              leading: Radio(
+                                                  value: 'englishTamil',
+                                                  groupValue: Provider.of<
+                                                              ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .format,
+                                                  onChanged: (val) {
+                                                    Provider.of<ThemeProvider>(
+                                                            context,
+                                                            listen: true)
+                                                        .setFormat(val!);
+                                                  }),
+                                              title: Text(
+                                                'English followed by Tamil',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                Provider.of<ThemeProvider>(
+                                                        context,
+                                                        listen: true)
+                                                    .setFormat('onlyTamil');
+                                              },
+                                              leading: Radio(
+                                                  value: 'onlyTamil',
+                                                  groupValue: Provider.of<
+                                                              ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .format,
+                                                  onChanged: (val) {
+                                                    Provider.of<ThemeProvider>(
+                                                            context,
+                                                            listen: true)
+                                                        .setFormat(val!);
+                                                  }),
+                                              title: Text(
+                                                'Only Tamil',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                            ListTile(
+                                              onTap: () {
+                                                Provider.of<ThemeProvider>(
+                                                        context,
+                                                        listen: true)
+                                                    .setFormat('onlyEnglish');
+                                              },
+                                              leading: Radio(
+                                                  value: 'onlyEnglish',
+                                                  groupValue: Provider.of<
+                                                              ThemeProvider>(
+                                                          context,
+                                                          listen: true)
+                                                      .format,
+                                                  onChanged: (val) {
+                                                    Provider.of<ThemeProvider>(
+                                                            context,
+                                                            listen: true)
+                                                        .setFormat(val!);
+                                                  }),
+                                              title: Text(
+                                                'Only English',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.settings)),
+                      IconButton(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const HomePage()),
+                                (route) => false);
+                          },
+                          icon: const Icon(Icons.home))
+                    ],
+                  ),
+                ],
+              ),
+            )),
         body: Consumer<VerseProvider>(
           builder: (context, verse, child) => Padding(
             padding: const EdgeInsets.all(20.0),
@@ -110,7 +292,9 @@ class _SearchPageState extends State<SearchPage> {
                   TextField(
                     controller: searchQuery,
                     decoration: InputDecoration(
-                        hintText: searchVerse,
+                        hintText:
+                            Provider.of<ThemeProvider>(context, listen: true)
+                                .searchVerse,
                         border: const OutlineInputBorder()),
                     onSubmitted: (value) async {
                       FocusManager.instance.primaryFocus?.unfocus();
@@ -118,6 +302,57 @@ class _SearchPageState extends State<SearchPage> {
                   ),
                   const SizedBox(
                     height: 10,
+                  ),
+                  Text(
+                    'Select Language',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      setState(() {
+                        searchLanguage = 'tamil';
+                      });
+                    },
+                    leading: Radio(
+                        value: 'tamil',
+                        groupValue: searchLanguage,
+                        onChanged: (val) {
+                          setState(() {
+                            searchLanguage = 'tamil';
+                          });
+                        }),
+                    title: Text(
+                      'தமிழ்',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    onTap: () {
+                      setState(() {
+                        searchLanguage = 'english';
+                      });
+                    },
+                    leading: Radio(
+                        value: 'english',
+                        groupValue: searchLanguage,
+                        onChanged: (val) {
+                          setState(() {
+                            searchLanguage = 'english';
+                          });
+                        }),
+                    title: Text(
+                      'English',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                   ElevatedButton(
                       onPressed: () async {
@@ -135,7 +370,8 @@ class _SearchPageState extends State<SearchPage> {
                               });
                           await Future.delayed(Duration(seconds: 1));
                           await verse
-                              .filterSearchResults(searchQuery.text.trim())
+                              .filterSearchResults(
+                                  searchQuery.text.trim(), searchLanguage)
                               .then((value) => Navigator.pop(context));
                         }
                       },
@@ -143,13 +379,15 @@ class _SearchPageState extends State<SearchPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.search),
-                          Text(searchName),
+                          Text(Provider.of<ThemeProvider>(context, listen: true)
+                              .searchName),
                         ],
                       )),
                   const SizedBox(
                     height: 10,
                   ),
-                  Text("$totalVerse: ${verse.searchVerse.length}"),
+                  Text(
+                      "${Provider.of<ThemeProvider>(context, listen: true).totalVerse}: ${verse.searchVerse.length}"),
                   const SizedBox(
                     height: 20,
                   ),
@@ -181,14 +419,47 @@ class _SearchPageState extends State<SearchPage> {
                                   children: [
                                     InkWell(
                                       onTap: () async {
-                                        await Clipboard.setData(ClipboardData(
-                                                text:
-                                                    "${vm.verse!} ${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}"))
-                                            .then((value) {
-                                          Navigator.pop(context);
-                                        });
+                                        var format = Provider.of<ThemeProvider>(
+                                                context,
+                                                listen: false)
+                                            .format;
+                                        if (format == 'onlyTamil') {
+                                          await Clipboard.setData(ClipboardData(
+                                                  text:
+                                                      "${vm.verseTam!} ${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}"))
+                                              .then((value) {
+                                            Navigator.pop(context);
+                                          });
+                                        }
+                                        if (format == 'onlyEnglish') {
+                                          await Clipboard.setData(ClipboardData(
+                                                  text:
+                                                      "${vm.verseEng!} ${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}"))
+                                              .then((value) {
+                                            Navigator.pop(context);
+                                          });
+                                        }
+                                        if (format == 'tamilEnglish') {
+                                          await Clipboard.setData(ClipboardData(
+                                                  text:
+                                                      "${vm.verseTam!} ${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!} \n${vm.verseEng!} ${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}"))
+                                              .then((value) {
+                                            Navigator.pop(context);
+                                          });
+                                        }
+                                        if (format == 'englishTamil') {
+                                          await Clipboard.setData(ClipboardData(
+                                                  text:
+                                                      "${vm.verseEng!} ${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!} \n${vm.verseTam!} ${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!} \n"))
+                                              .then((value) {
+                                            Navigator.pop(context);
+                                          });
+                                        }
                                       },
-                                      child: Text(copy),
+                                      child: Text(Provider.of<ThemeProvider>(
+                                              context,
+                                              listen: true)
+                                          .copy),
                                     ),
                                     SizedBox(
                                       height: 10,
@@ -201,7 +472,9 @@ class _SearchPageState extends State<SearchPage> {
                                                 builder: (context) => VersePage(
                                                       book: BooksModel(
                                                           bookNo: vm.book,
-                                                          name: getBookName(
+                                                          nameE: getBookNameEng(
+                                                              vm.book!),
+                                                          nameT: getBookName(
                                                               vm.book!),
                                                           noOfBooks: bibleBooks[
                                                               getBookName(
@@ -210,7 +483,10 @@ class _SearchPageState extends State<SearchPage> {
                                                       verseNo: vm.verseNo,
                                                     )));
                                       },
-                                      child: Text(gotoVerse),
+                                      child: Text(Provider.of<ThemeProvider>(
+                                              context,
+                                              listen: true)
+                                          .gotoVerse),
                                     ),
                                     SizedBox(
                                       height: 10,
@@ -222,7 +498,10 @@ class _SearchPageState extends State<SearchPage> {
                                           Navigator.pop(context);
                                         });
                                       },
-                                      child: Text(addToBookMark),
+                                      child: Text(Provider.of<ThemeProvider>(
+                                              context,
+                                              listen: true)
+                                          .addToBookMark),
                                     ),
                                   ],
                                 ),
@@ -231,30 +510,24 @@ class _SearchPageState extends State<SearchPage> {
                           },
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                      color: Provider.of<ThemeProvider>(context,
-                                                  listen: false)
-                                              .isDarkMode
-                                          ? Colors.white
-                                          : Colors.black)),
-                              child: Column(
-                                children: [
-                                  ListTile(
-                                    title: Text(vm.verse!),
-                                  ),
-                                  Text(
-                                    "${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15),
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  )
-                                ],
+                            child: Consumer<ThemeProvider>(
+                              builder: (context, theme, child) => Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                        color: Provider.of<ThemeProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .isDarkMode
+                                            ? Colors.white
+                                            : Colors.black)),
+                                child: theme.format == 'onlyTamil'
+                                    ? onlyTamilMethod(vm)
+                                    : theme.format == 'onlyEnglish'
+                                        ? onlyEnglishMethod(vm)
+                                        : theme.format == 'tamilEnglish'
+                                            ? tamilFollowedEnglishMethod(vm)
+                                            : englishFollowedTamilMethod(vm),
                               ),
                             ),
                           ),
@@ -265,5 +538,86 @@ class _SearchPageState extends State<SearchPage> {
             ),
           ),
         ));
+  }
+
+  Column onlyEnglishMethod(VerseModel vm) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(vm.verseEng!),
+        ),
+        Text(
+          "${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
+    );
+  }
+
+  Column onlyTamilMethod(VerseModel vm) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(vm.verseTam!),
+        ),
+        Text(
+          "${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
+    );
+  }
+
+  Column tamilFollowedEnglishMethod(VerseModel vm) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(vm.verseTam!),
+        ),
+        Text(
+          "${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        Divider(),
+        ListTile(
+          title: Text(vm.verseEng!),
+        ),
+        Text(
+          "${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+      ],
+    );
+  }
+
+  Column englishFollowedTamilMethod(VerseModel vm) {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(vm.verseEng!),
+        ),
+        Text(
+          "${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        Divider(),
+        ListTile(
+          title: Text(vm.verseTam!),
+        ),
+        Text(
+          "${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+        ),
+        const SizedBox(
+          height: 10,
+        ),
+      ],
+    );
   }
 }

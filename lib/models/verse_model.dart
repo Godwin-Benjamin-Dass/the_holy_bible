@@ -5,7 +5,8 @@ class VerseModel {
   int? book;
   int? chapter;
   int? verseNo;
-  String? verse;
+  String? verseTam;
+  String? verseEng;
   bool? isSelected;
 
   VerseModel({
@@ -13,7 +14,8 @@ class VerseModel {
     this.book,
     this.chapter,
     this.verseNo,
-    this.verse,
+    this.verseTam,
+    this.verseEng,
     this.isSelected,
   });
 
@@ -27,7 +29,8 @@ class VerseModel {
       book: json["book"],
       chapter: json["chapter"],
       verseNo: json["verse_no"],
-      verse: json["verse"],
+      verseTam: json["verse_tam"],
+      verseEng: json["verse_eng"],
       isSelected: false);
 
   Map<String, dynamic> toJson() => {
@@ -35,6 +38,8 @@ class VerseModel {
         "book": book,
         "chapter": chapter,
         "verse_no": verseNo,
-        "verse": verse,
+        "verse_tam": verseTam,
+        "verse_eng": verseEng,
+        "isSelected": isSelected,
       };
 }

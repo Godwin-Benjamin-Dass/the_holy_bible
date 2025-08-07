@@ -13,7 +13,7 @@ class VerseProvider extends ChangeNotifier {
 
   setverse(context) async {
     String data = await DefaultAssetBundle.of(context)
-        .loadString("assets/bible_verse.json");
+        .loadString("assets/bible_verse_tam_english.json");
     final jsonResult = jsonDecode(data);
     allVerse.clear();
     for (var book in jsonResult) {
@@ -35,9 +35,13 @@ class VerseProvider extends ChangeNotifier {
   List<VerseModel> _searchVerse = [];
   List<VerseModel> get searchVerse => _searchVerse;
 
-  Future filterSearchResults(String query) async {
-    _searchVerse =
-        allVerse.where((item) => item.verse!.contains(query)).toList();
+  Future filterSearchResults(String query, String language) async {
+    if (language == "english")
+      _searchVerse =
+          allVerse.where((item) => item.verseEng!.contains(query)).toList();
+    else
+      _searchVerse =
+          allVerse.where((item) => item.verseTam!.contains(query)).toList();
 
     notifyListeners();
   }
@@ -48,7 +52,8 @@ class VerseProvider extends ChangeNotifier {
   addRecentVerse(BooksModel book, int chapter, int? verse) {
     int idx = -1;
     for (int i = 0; i < _recentlyViewedVerse.length; i++) {
-      if (_recentlyViewedVerse[i]["book"].name == book.name) {
+      if (_recentlyViewedVerse[i]["book"].nameT == book.nameT ||
+          _recentlyViewedVerse[i]["book"].nameE == book.nameE) {
         log("stage 1");
         if (_recentlyViewedVerse[i]["chapter"] == chapter) {
           log("stage 2");

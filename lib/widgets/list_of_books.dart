@@ -29,12 +29,20 @@ class ListOfBooks extends StatelessWidget {
                 fontSize: 15,
               ),
             ),
-            title: Text(
-              book.name!,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: Provider.of<ThemeProvider>(context, listen: false)
-                      .fontSize),
+            title: Consumer<ThemeProvider>(
+              builder: (context, theme, child) => Text(
+                theme.format == 'onlyTamil'
+                    ? book.nameT!
+                    : theme.format == 'onlyEnglish'
+                        ? book.nameE!
+                        : theme.format == 'tamilEnglish'
+                            ? book.nameT! + '/' + book.nameE!
+                            : book.nameE! + '/' + book.nameT!,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: Provider.of<ThemeProvider>(context, listen: false)
+                        .fontSize),
+              ),
             ),
             trailing: Text(
               book.noOfBooks.toString(),

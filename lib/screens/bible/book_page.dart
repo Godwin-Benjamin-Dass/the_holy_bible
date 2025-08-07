@@ -1,8 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:holy_bible_tamil/data/constants.dart';
 import 'package:holy_bible_tamil/provider/books_provider.dart';
+import 'package:holy_bible_tamil/provider/theme_provider.dart';
 import 'package:holy_bible_tamil/widgets/list_of_books.dart';
 import 'package:provider/provider.dart';
 
@@ -28,34 +29,84 @@ class _BooksPageState extends State<BooksPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(theHolyBibleName),
-        bottom: PreferredSize(
-          preferredSize: const Size(double.infinity, 30),
-          child: TabBar(
-            unselectedLabelColor: Colors.grey,
+    return Consumer<ThemeProvider>(
+      builder: (context, theme, child) => Scaffold(
+        appBar: PreferredSize(
+            preferredSize: Size(double.infinity, 115),
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    children: [
+                      BackButton(),
+                      Tooltip(
+                          message: theme.theHolyBibleName,
+                          child: SizedBox(
+                            width: MediaQuery.sizeOf(context).width * .6,
+                            child: AutoSizeText(
+                              theme.theHolyBibleName,
+                              maxFontSize: 17,
+                              minFontSize: 17,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          )),
+                    ],
+                  ),
+                  TabBar(
+                    unselectedLabelColor: Colors.grey,
+                    controller: tabController,
+                    tabs: [
+                      Container(
+                          alignment: Alignment.center,
+                          height: 50,
+                          child: AutoSizeText(
+                              maxFontSize: 17, theme.theOldTestamentName)),
+                      Container(
+                          alignment: Alignment.center,
+                          height: 50,
+                          child: AutoSizeText(
+                              maxFontSize: 17, theme.theNewTestamentName)),
+                    ],
+                  )
+                ],
+              ),
+            ))
+        //  AppBar(
+        //   automaticallyImplyLeading: false,
+        //   title: ,
+        //   bottom: PreferredSize(
+        //     preferredSize: const Size(double.infinity, 30),
+        //     child: TabBar(
+        //       unselectedLabelColor: Colors.grey,
+        //       controller: tabController,
+        //       tabs: [
+        //         Container(
+        //             alignment: Alignment.center,
+        //             height: 50,
+        //             child: Text(theme.theOldTestamentName)),
+        //         Container(
+        //             alignment: Alignment.center,
+        //             height: 50,
+        //             child: Text(theme.theNewTestamentName)),
+        //       ],
+        //     ),
+        //   ),
+        // ),
+        ,
+        body: Consumer<BooksProvider>(
+          builder: (context, book, child) => TabBarView(
             controller: tabController,
-            tabs: [
-              Container(
-                  alignment: Alignment.center,
-                  height: 50,
-                  child: Text(theOldTestamentName)),
-              Container(
-                  alignment: Alignment.center,
-                  height: 50,
-                  child: Text(theNewTestamentName)),
+            children: [
+              ListOfBooks(books: book.oldTestament),
+              ListOfBooks(books: book.newTestament)
             ],
           ),
-        ),
-      ),
-      body: Consumer<BooksProvider>(
-        builder: (context, book, child) => TabBarView(
-          controller: tabController,
-          children: [
-            ListOfBooks(books: book.oldTestament),
-            ListOfBooks(books: book.newTestament)
-          ],
         ),
       ),
     );

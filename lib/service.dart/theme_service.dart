@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ThemeService {
   static String appThemeKey = "_appTheme";
   static String fontSizeKey = "_fontSize";
+  static String verseFormatKey = "_verseFormatTheme";
 
   static Future setTheme(bool darkTheme) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -33,6 +34,21 @@ class ThemeService {
       return 15.0;
     } else {
       return size;
+    }
+  }
+
+  static Future setFormat(String format) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setString(verseFormatKey, format);
+  }
+
+  static Future getFormat() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? format = prefs.getString(verseFormatKey);
+    if (format == null) {
+      return 'tamilEnglish';
+    } else {
+      return format;
     }
   }
 }
