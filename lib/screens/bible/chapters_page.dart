@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:holy_bible_tamil/models/books_model.dart';
 import 'package:holy_bible_tamil/provider/theme_provider.dart';
@@ -13,7 +14,28 @@ class ChaptersPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(book.name!),
+        title: Consumer<ThemeProvider>(
+            builder: (context, theme, child) => Tooltip(
+                  message: theme.format == 'onlyTamil'
+                      ? book.nameT!
+                      : theme.format == 'onlyEnglish'
+                          ? book.nameE!
+                          : theme.format == 'tamilEnglish'
+                              ? book.nameT! + '/' + book.nameE!
+                              : book.nameE! + '/' + book.nameT!,
+                  child: AutoSizeText(
+                      theme.format == 'onlyTamil'
+                          ? book.nameT!
+                          : theme.format == 'onlyEnglish'
+                              ? book.nameE!
+                              : theme.format == 'tamilEnglish'
+                                  ? book.nameT! + '/' + book.nameE!
+                                  : book.nameE! + '/' + book.nameT!,
+                      maxFontSize: 17,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                      )),
+                )),
       ),
       body: GridView.builder(
           itemCount: book.noOfBooks,

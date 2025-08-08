@@ -5,9 +5,14 @@ import 'package:holy_bible_tamil/screens/bible/chapters_page.dart';
 import 'package:provider/provider.dart';
 
 class DrawerList extends StatelessWidget {
-  const DrawerList({super.key, required this.books, this.isFromHome = false});
+  const DrawerList(
+      {super.key,
+      required this.books,
+      this.isFromHome = false,
+      this.isOldTestament = false});
   final List<BooksModel> books;
   final bool isFromHome;
+  final bool isOldTestament;
 
   @override
   Widget build(BuildContext context) {
@@ -32,12 +37,20 @@ class DrawerList extends StatelessWidget {
                 fontSize: 15,
               ),
             ),
-            title: Text(
-              book.name!,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: Provider.of<ThemeProvider>(context, listen: false)
-                      .fontSize),
+            title: Consumer<ThemeProvider>(
+              builder: (context, theme, child) => Text(
+                theme.format == 'onlyTamil'
+                    ? book.nameT!
+                    : theme.format == 'onlyEnglish'
+                        ? book.nameE!
+                        : theme.format == 'tamilEnglish'
+                            ? book.nameT! + '/' + book.nameE!
+                            : book.nameE! + '/' + book.nameT!,
+                style: TextStyle(
+                    color: isOldTestament ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18),
+              ),
             ),
             trailing: Text(
               book.noOfBooks.toString(),

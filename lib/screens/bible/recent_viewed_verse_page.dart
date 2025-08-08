@@ -1,9 +1,9 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:holy_bible_tamil/data/constants.dart';
 import 'package:holy_bible_tamil/models/books_model.dart';
+import 'package:holy_bible_tamil/provider/theme_provider.dart';
 import 'package:holy_bible_tamil/provider/verse_provider.dart';
 import 'package:holy_bible_tamil/screens/bible/verse_page.dart';
-import 'package:holy_bible_tamil/screens/home_flow/home_page.dart';
 import 'package:provider/provider.dart';
 
 class RecentlyViewVersePage extends StatelessWidget {
@@ -12,16 +12,13 @@ class RecentlyViewVersePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(recentVerse), actions: [
-        IconButton(
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomePage()),
-                  (route) => false);
-            },
-            icon: const Icon(Icons.home))
-      ]),
+      appBar: AppBar(
+        title: AutoSizeText(Provider.of<ThemeProvider>(context).recentVerse,
+            maxFontSize: 17,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+            )),
+      ),
       body: Consumer<VerseProvider>(
         builder: (context, verse, child) => ListView.builder(
             itemCount: verse.recentlyViewedVerse.length,
@@ -42,7 +39,7 @@ class RecentlyViewVersePage extends StatelessWidget {
                               )));
                 },
                 title: Text(
-                  book.name ?? "",
+                  book.nameT ?? "",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(

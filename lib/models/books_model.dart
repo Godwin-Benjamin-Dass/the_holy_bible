@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 class BooksModel {
-  String? name;
+  String? nameT;
+  String? nameE;
   int? bookNo;
   int? noOfBooks;
 
   BooksModel({
-    this.name,
+    this.nameT,
+    this.nameE,
     this.bookNo,
     this.noOfBooks,
   });
@@ -17,13 +19,15 @@ class BooksModel {
   String toRawJson() => json.encode(toJson());
 
   factory BooksModel.fromJson(Map<String, dynamic> json) => BooksModel(
-        name: json["name"],
+        nameT: json["nameT"],
+        nameE: json["nameE"],
         bookNo: json["book_no"],
         noOfBooks: json["no_of_books"],
       );
 
   Map<String, dynamic> toJson() => {
-        "name": name,
+        "nameT": nameT,
+        "nameE": nameE,
         "book_no": bookNo,
         "no_of_books": noOfBooks,
       };
