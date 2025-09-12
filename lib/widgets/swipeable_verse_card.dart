@@ -36,11 +36,19 @@ class _SwipeableVerseCardState extends State<SwipeableVerseCard> {
               children: const [
                 Padding(
                   padding: EdgeInsets.only(left: 12.0),
-                  child: Icon(Icons.arrow_back_ios, size: 32),
+                  child: Icon(
+                    Icons.arrow_back_ios,
+                    size: 32,
+                    color: Colors.red,
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.only(right: 12.0),
-                  child: Icon(Icons.arrow_forward_ios, size: 32),
+                  child: Icon(
+                    Icons.arrow_forward_ios,
+                    size: 32,
+                    color: Colors.red,
+                  ),
                 ),
               ],
             ),

@@ -1,6 +1,5 @@
 // pages/note_editor_page.dart
-import 'dart:developer';
-
+import 'dart:async';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:holy_bible_tamil/data/constants.dart';
@@ -27,6 +26,8 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
   bool isEditing = false;
+  Timer? _debounce;
+  bool _showSaved = false; // For "Saved" indicator
 
   @override
   void initState() {
@@ -36,9 +37,18 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
       _titleController.text = widget.note!['title'] ?? '';
       _contentController.text = widget.note!['content'] ?? '';
     }
+
+    // Auto-save listeners
+    _titleController.addListener(_onChanged);
+    _contentController.addListener(_onChanged);
   }
 
-  void _saveNote() async {
+  void _onChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(seconds: 1), _autoSave);
+  }
+
+  Future<void> _autoSave() async {
     String title = _titleController.text.trim();
     String content = _contentController.text.trim();
     if (title.isEmpty && content.isEmpty) return;
@@ -48,79 +58,72 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
     if (isEditing) {
       await DBHelper.updateNote(widget.note!['id'], title, content);
     } else {
-      await DBHelper.insertNote(title, content, date);
+      int newId = await DBHelper.insertNote(title, content, date);
+      widget.note?['id'] = newId;
+      isEditing = true;
     }
 
-    Navigator.pop(context);
+    // Show saved indicator
+    setState(() => _showSaved = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _showSaved = false);
+    });
+
+    debugPrint("Note auto-saved ✅");
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _contentController.dispose();
+    _debounce?.cancel();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context, listen: false);
+
     return Scaffold(
       appBar: PreferredSize(
-          preferredSize: Size(double.infinity, 70),
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: 5,
+        preferredSize: const Size(double.infinity, 70),
+        child: SafeArea(
+          child: Row(
+            children: [
+              const BackButton(),
+              Expanded(
+                child: AutoSizeText(
+                  isEditing ? theme.editNotes : theme.newNotes,
+                  maxFontSize: 17,
+                  minFontSize: 17,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                Row(
-                  children: [
-                    BackButton(),
-                    Tooltip(
-                        message: isEditing
-                            ? Provider.of<ThemeProvider>(context, listen: false)
-                                .editNotes
-                            : Provider.of<ThemeProvider>(context, listen: false)
-                                .newNotes,
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width * .6,
-                          child: AutoSizeText(
-                            isEditing
-                                ? Provider.of<ThemeProvider>(context,
-                                        listen: false)
-                                    .editNotes
-                                : Provider.of<ThemeProvider>(context,
-                                        listen: false)
-                                    .newNotes,
-                            maxFontSize: 17,
-                            minFontSize: 17,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        )),
-                    Spacer(),
-                    IconButton(
-                        onPressed: () async {
-                          String title = _titleController.text.trim();
-                          String content = _contentController.text.trim();
-                          if (title.isEmpty && content.isEmpty) return;
-
-                          String date =
-                              DateFormat.yMMMMd().format(DateTime.now());
-
-                          if (isEditing) {
-                            await DBHelper.updateNote(
-                                widget.note!['id'], title, content);
-                          } else {
-                            await DBHelper.insertNote(title, content, date);
-                          }
-                          Share.share(
-                              '${_titleController.text.trim()}\n\n${_contentController.text.trim()}');
-                        },
-                        icon: Icon(Icons.share)),
-                    IconButton(
-                      icon: const Icon(Icons.save),
-                      onPressed: _saveNote,
-                    )
-                  ],
+              ),
+              if (_showSaved)
+                const Padding(
+                  padding: EdgeInsets.only(right: 12.0),
+                  child: Text(
+                    "Saved",
+                    style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.green),
+                  ),
                 ),
-              ],
-            ),
-          )),
+              IconButton(
+                tooltip: "Share",
+                onPressed: () {
+                  String title = _titleController.text.trim();
+                  String content = _contentController.text.trim();
+                  if (title.isEmpty && content.isEmpty) return;
+                  Share.share("$title\n\n$content");
+                },
+                icon: const Icon(Icons.share),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -148,156 +151,139 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () async {
-            BooksModel books =
-                Provider.of<BooksProvider>(context, listen: false)
-                    .oldTestament
-                    .first;
-            List chapters = [];
-            String selected_book = "1";
-            for (int i = 0; i < 50; i++) {
-              chapters.add(i + 1);
-            }
-            List<VerseModel> verse =
-                await Provider.of<VerseProvider>(context, listen: false)
-                    .getVerses(bookNo: 1, chapterNo: 1, context: context);
-            VerseModel selected_verse =
-                Provider.of<VerseProvider>(context, listen: false).verse.first;
-            List<BooksModel> book = Provider.of<BooksProvider>(context,
-                        listen: false)
-                    .oldTestament +
-                Provider.of<BooksProvider>(context, listen: false).newTestament;
+        child: const Icon(Icons.add),
+        onPressed: () async {
+          // Existing verse reference picker (untouched)
+          BooksModel books = Provider.of<BooksProvider>(context, listen: false)
+              .oldTestament
+              .first;
+          List chapters = List.generate(50, (i) => i + 1);
+          String selected_book = "1";
+          List<VerseModel> verse =
+              await Provider.of<VerseProvider>(context, listen: false)
+                  .getVerses(bookNo: 1, chapterNo: 1, context: context);
+          VerseModel selected_verse =
+              Provider.of<VerseProvider>(context, listen: false).verse.first;
+          List<BooksModel> book =
+              Provider.of<BooksProvider>(context, listen: false).oldTestament +
+                  Provider.of<BooksProvider>(context, listen: false)
+                      .newTestament;
 
-            showDialog(
-                context: context,
-                builder: (_) => StatefulBuilder(builder: (context, setState) {
-                      return Consumer<ThemeProvider>(
-                        builder: (context, theme, child) => AlertDialog(
-                          title: Text(theme.referece),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Consumer<ThemeProvider>(
-                                builder: (context, theme, child) =>
-                                    DropdownButton(
-                                  value: books,
-                                  items: book.map((value) {
-                                    return DropdownMenuItem(
-                                      value: value,
-                                      child: Text(
-                                          getFormattedBookName(theme, value)),
-                                    );
-                                  }).toList(),
-                                  onChanged: (val) async {
-                                    books = val!;
-                                    log(books.toRawJson());
-                                    selected_book = "1";
-                                    verse = await Provider.of<VerseProvider>(
-                                            context,
-                                            listen: false)
-                                        .getVerses(
-                                            bookNo: books.bookNo!,
-                                            chapterNo: 1,
-                                            context: context);
-                                    selected_verse = Provider.of<VerseProvider>(
-                                            context,
-                                            listen: false)
-                                        .verse
-                                        .first;
-                                    chapters.clear();
-                                    for (int i = 0; i < books.noOfBooks!; i++) {
-                                      chapters.add(i + 1);
-                                    }
-                                    setState(() {});
-                                  },
+          showDialog(
+            context: context,
+            builder: (_) => StatefulBuilder(
+              builder: (context, setState) {
+                return Consumer<ThemeProvider>(
+                  builder: (context, theme, child) => AlertDialog(
+                    title: Text(theme.referece),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DropdownButton(
+                          value: books,
+                          items: book.map((value) {
+                            return DropdownMenuItem(
+                              value: value,
+                              child: Text(getFormattedBookName(theme, value)),
+                            );
+                          }).toList(),
+                          onChanged: (val) async {
+                            books = val!;
+                            selected_book = "1";
+                            verse = await Provider.of<VerseProvider>(context,
+                                    listen: false)
+                                .getVerses(
+                                    bookNo: books.bookNo!,
+                                    chapterNo: 1,
+                                    context: context);
+                            selected_verse = Provider.of<VerseProvider>(context,
+                                    listen: false)
+                                .verse
+                                .first;
+                            chapters =
+                                List.generate(books.noOfBooks!, (i) => i + 1);
+                            setState(() {});
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            DropdownButton<String>(
+                              value: selected_book,
+                              items: chapters.map((value) {
+                                return DropdownMenuItem<String>(
+                                  value: value.toString(),
+                                  child: Text(value.toString()),
+                                );
+                              }).toList(),
+                              onChanged: (val) async {
+                                selected_book = val!;
+                                verse = await Provider.of<VerseProvider>(
+                                        context,
+                                        listen: false)
+                                    .getVerses(
+                                        bookNo: books.bookNo!,
+                                        chapterNo: int.parse(selected_book),
+                                        context: context);
+                                selected_verse = Provider.of<VerseProvider>(
+                                        context,
+                                        listen: false)
+                                    .verse
+                                    .first;
+                                setState(() {});
+                              },
+                            ),
+                            DropdownButton<VerseModel>(
+                              value: selected_verse,
+                              items: verse.map((value) {
+                                return DropdownMenuItem(
+                                  value: value,
+                                  child: Text(value.verseNo.toString()),
+                                );
+                              }).toList(),
+                              onChanged: (val) {
+                                selected_verse = val!;
+                                setState(() {});
+                              },
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        ElevatedButton(
+                          onPressed: () async {
+                            String? verses = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => VersePage(
+                                  isFromnotes: true,
+                                  book: BooksModel(
+                                    bookNo: selected_verse.book,
+                                    nameE: getBookNameEng(selected_verse.book!),
+                                    nameT: getBookName(selected_verse.book!),
+                                    noOfBooks: bibleBooks[
+                                        getBookName(selected_verse.book!)],
+                                  ),
+                                  chapter: selected_verse.chapter!,
+                                  verseNo: selected_verse.verseNo,
                                 ),
                               ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  DropdownButton<String>(
-                                    value: selected_book,
-                                    items: chapters.map((value) {
-                                      return DropdownMenuItem<String>(
-                                        value: value.toString(),
-                                        child: Text(value.toString()),
-                                      );
-                                    }).toList(),
-                                    onChanged: (val) async {
-                                      selected_book = val!.toString();
-                                      verse = await Provider.of<VerseProvider>(
-                                              context,
-                                              listen: false)
-                                          .getVerses(
-                                              bookNo: books.bookNo!,
-                                              chapterNo:
-                                                  int.parse(selected_book),
-                                              context: context);
-                                      selected_verse =
-                                          Provider.of<VerseProvider>(context,
-                                                  listen: false)
-                                              .verse
-                                              .first;
-                                      setState(() {});
-                                    },
-                                  ),
-                                  DropdownButton<VerseModel>(
-                                    value: selected_verse,
-                                    items: verse.map((value) {
-                                      return DropdownMenuItem(
-                                        value: value,
-                                        child: Text(value.verseNo.toString()),
-                                      );
-                                    }).toList(),
-                                    onChanged: (val) {
-                                      selected_verse = val!;
-                                      setState(() {});
-                                    },
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
-                              ),
-                              ElevatedButton(
-                                  onPressed: () async {
-                                    String? verses = await Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => VersePage(
-                                                  isFromnotes: true,
-                                                  book: BooksModel(
-                                                      bookNo:
-                                                          selected_verse.book,
-                                                      nameE: getBookNameEng(
-                                                          selected_verse.book!),
-                                                      nameT: getBookName(
-                                                          selected_verse.book!),
-                                                      noOfBooks: bibleBooks[
-                                                          getBookName(
-                                                              selected_verse
-                                                                  .book!)]),
-                                                  chapter:
-                                                      selected_verse.chapter!,
-                                                  verseNo:
-                                                      selected_verse.verseNo,
-                                                )));
-                                    if (verses != null) {
-                                      Navigator.pop(context);
-                                    }
-                                  },
-                                  child: Text(theme.gotoVerse))
-                            ],
-                          ),
-                        ),
-                      );
-                    }));
-          }),
+                            );
+                            if (verses != null) {
+                              Navigator.pop(context);
+                            }
+                          },
+                          child: Text(theme.gotoVerse),
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 

@@ -1,4 +1,4 @@
-package com.example.holy_bible_tamil
+package com.godwinsinfotech.holy_bible_tamil_english
 
 import io.flutter.embedding.android.FlutterActivity
 

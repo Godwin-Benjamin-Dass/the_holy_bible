@@ -17,6 +17,7 @@ import 'package:holy_bible_tamil/widgets/drawer_list.dart';
 import 'package:holy_bible_tamil/widgets/swipeable_verse_card.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
 import '../../provider/books_provider.dart';
@@ -58,8 +59,10 @@ class _VersePageState extends State<VersePage> {
 
         if (_previousFirstIndex != null) {
           if (firstVisibleItemIndex > _previousFirstIndex!) {
+            // scroll down by at least 2 items
             onScrollDown();
           } else if (firstVisibleItemIndex < _previousFirstIndex!) {
+            // scroll up by at least 2 items
             onScrollUp();
           }
         }
@@ -75,20 +78,16 @@ class _VersePageState extends State<VersePage> {
 
   void onScrollUp() {
     print("User scrolled UP");
-    if (!showAppBar) {
-      setState(() {
-        showAppBar = true;
-      });
+    if (!Provider.of<ThemeProvider>(context, listen: false).showAppbar) {
+      Provider.of<ThemeProvider>(context, listen: false).toggleAppBar = true;
     }
     // Add your logic here
   }
 
   void onScrollDown() {
     print("User scrolled DOWN");
-    if (showAppBar) {
-      setState(() {
-        showAppBar = false;
-      });
+    if (Provider.of<ThemeProvider>(context, listen: false).showAppbar) {
+      Provider.of<ThemeProvider>(context, listen: false).toggleAppBar = false;
     }
     // Add your logic here
   }
@@ -209,7 +208,7 @@ class _VersePageState extends State<VersePage> {
               child: FadeTransition(opacity: animation, child: child),
             );
           },
-          child: showAppBar
+          child: Provider.of<ThemeProvider>(context, listen: true).showAppbar
               ? buildCustomAppBar(context, _key, widget.book)
               : const SizedBox.shrink(key: ValueKey('empty-appbar')),
         ),
@@ -226,11 +225,16 @@ class _VersePageState extends State<VersePage> {
                 onSwipeLeft: () => nextChapter(),
                 onSwipeRight: () => previousChapter(),
                 child: ScrollablePositionedList.builder(
+                  padding: EdgeInsets.only(
+                    bottom: 100 + MediaQuery.of(context).padding.bottom,
+                  ),
+                  physics: ClampingScrollPhysics(),
                   itemPositionsListener: itemPositionsListener,
                   itemScrollController: _scrollController,
                   itemCount: verse.verse.length,
                   itemBuilder: (context, i) {
                     VerseModel vm = verse.verse[i];
+
                     return GestureDetector(
                       onScaleStart: (details) {
                         _baseScaleFactor =
@@ -315,7 +319,7 @@ class _VersePageState extends State<VersePage> {
                                     ? onlyEnglishWidget(vm)
                                     : theme.format == 'tamilEnglish'
                                         ? tamilFollowedByEnglishWidget(vm)
-                                        : englishFollowedByEnglishWidget(vm),
+                                        : englishFollowedByTamilWidget(vm),
                           ),
                         ),
                       ),
@@ -489,6 +493,7 @@ class _VersePageState extends State<VersePage> {
           : copyVerse.isNotEmpty
               ? Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Consumer<ThemeProvider>(
                       builder: (context, theme, child) => FloatingActionButton(
@@ -531,9 +536,8 @@ class _VersePageState extends State<VersePage> {
                               copyString +=
                                   "${getBookNameEng(widget.book.bookNo!)}/${widget.book.nameT}:${copyVerse.first.chapter!}";
                             }
-                            await Clipboard.setData(
-                                ClipboardData(text: copyString));
-                            copyVerse.clear();
+                            Share.share(copyString);
+
                             for (var vm in Provider.of<VerseProvider>(context,
                                     listen: false)
                                 .verse) {
@@ -541,57 +545,100 @@ class _VersePageState extends State<VersePage> {
                             }
                             setState(() {});
                           },
-                          child: const Icon(Icons.copy)),
+                          child: const Icon(Icons.share)),
                     ),
                     SizedBox(
                       height: 10,
                     ),
-                    FloatingActionButton(
-                        heroTag: "btn_4",
-                        onPressed: () async {
-                          for (var vm in copyVerse) {
-                            await BookMarkService.addBookMark(vm);
-                          }
-                          for (var vm in Provider.of<VerseProvider>(context,
-                                  listen: false)
-                              .verse) {
-                            vm.isSelected = false;
-                          }
-                          copyVerse.clear();
-                          Fluttertoast.showToast(
-                              msg: Provider.of<ThemeProvider>(context,
-                                      listen: true)
-                                  .addToBookmark);
-                          setState(() {});
-                        },
-                        child: const Icon(Icons.book))
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Consumer<ThemeProvider>(
+                          builder: (context, theme, child) =>
+                              FloatingActionButton(
+                                  heroTag: "btn_3",
+                                  onPressed: () async {
+                                    String copyString = "";
+                                    if (theme.format == 'onlyTamil') {
+                                      for (var vm in copyVerse) {
+                                        copyString +=
+                                            "${vm.verseNo!} ${vm.verseTam}";
+                                        copyString += "\n";
+                                      }
+                                      copyString +=
+                                          "${widget.book.nameT}:${copyVerse.first.chapter!}";
+                                    }
+                                    if (theme.format == 'onlyEnglish') {
+                                      for (var vm in copyVerse) {
+                                        copyString +=
+                                            "${vm.verseNo!} ${vm.verseEng}";
+                                        copyString += "\n";
+                                      }
+                                      copyString +=
+                                          "${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
+                                    }
+                                    if (theme.format == 'tamilEnglish') {
+                                      for (var vm in copyVerse) {
+                                        copyString +=
+                                            "${vm.verseNo!} ${vm.verseTam}";
+                                        copyString += "\n";
+                                        copyString += "${vm.verseEng}";
+                                        copyString += "\n";
+                                      }
+                                      copyString +=
+                                          "${widget.book.nameT}/${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
+                                    }
+                                    if (theme.format == 'englishTamil') {
+                                      for (var vm in copyVerse) {
+                                        copyString +=
+                                            "${vm.verseNo!} ${vm.verseEng}";
+                                        copyString += "\n";
+                                        copyString += "${vm.verseTam}";
+                                        copyString += "\n";
+                                      }
+                                      copyString +=
+                                          "${getBookNameEng(widget.book.bookNo!)}/${widget.book.nameT}:${copyVerse.first.chapter!}";
+                                    }
+                                    await Clipboard.setData(
+                                        ClipboardData(text: copyString));
+                                    copyVerse.clear();
+                                    for (var vm in Provider.of<VerseProvider>(
+                                            context,
+                                            listen: false)
+                                        .verse) {
+                                      vm.isSelected = false;
+                                    }
+                                    setState(() {});
+                                  },
+                                  child: const Icon(Icons.copy)),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        FloatingActionButton(
+                            heroTag: "btn_4",
+                            onPressed: () async {
+                              for (var vm in copyVerse) {
+                                await BookMarkService.addBookMark(vm);
+                              }
+                              for (var vm in Provider.of<VerseProvider>(context,
+                                      listen: false)
+                                  .verse) {
+                                vm.isSelected = false;
+                              }
+                              copyVerse.clear();
+                              Fluttertoast.showToast(
+                                  msg: Provider.of<ThemeProvider>(context,
+                                          listen: false)
+                                      .addToBookmark);
+                              setState(() {});
+                            },
+                            child: const Icon(Icons.book)),
+                      ],
+                    )
                   ],
                 )
               : null,
-    );
-  }
-
-  Column tamilFollowedByEnglishWidget(VerseModel vm) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text(
-            vm.verseNo.toString() + ") " + vm.verseTam!,
-            style: TextStyle(
-                color: vm.isSelected! ? Colors.orange : null,
-                fontWeight: FontWeight.bold),
-          ),
-        ),
-        Divider(),
-        ListTile(
-          title: Text(
-            vm.verseNo.toString() + ") " + vm.verseEng!,
-            style: TextStyle(
-                color: vm.isSelected! ? Colors.orange : null,
-                fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 
@@ -610,7 +657,7 @@ class _VersePageState extends State<VersePage> {
               Row(
                 children: [
                   SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.55,
+                    width: MediaQuery.of(context).size.width * 0.4,
                     child: Tooltip(
                         message: getFormattedBookName(theme, widget.book),
                         child: InkWell(
@@ -628,7 +675,7 @@ class _VersePageState extends State<VersePage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
-                            maxFontSize: 15,
+                            maxFontSize: 13,
                           ),
                         )),
                   ),
@@ -651,28 +698,21 @@ class _VersePageState extends State<VersePage> {
                 ],
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   if (widget.isFromnotes == false)
-                    IconButton(
-                        onPressed: () {
+                    GestureDetector(
+                        onTap: () {
                           Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
                                   builder: (_) => const HomePage()),
                               (_) => false);
                         },
-                        icon: Icon(Icons.home)),
-                  IconButton(
-                      onPressed: () {
-                        showModalBottomSheet<void>(
-                          context: context,
-                          isScrollControlled: false,
-                          builder: (BuildContext context) {
-                            return BottomSettingsSheet();
-                          },
-                        );
-                      },
-                      icon: Icon(Icons.settings)),
+                        child: Icon(Icons.home)),
+                  GestureDetector(
+                      onTap: () => _showSettingsSheet(context, theme),
+                      child: Icon(Icons.settings)),
                   SfSlider(
                       min: 10,
                       max: 30,
@@ -680,19 +720,106 @@ class _VersePageState extends State<VersePage> {
                       onChanged: ((val) {
                         theme.setFontSize(val);
                       })),
-                  IconButton(
-                      onPressed: () {
+                  GestureDetector(
+                      onTap: () {
                         theme.toggleTheme();
                       },
-                      icon: Icon(theme.isDarkMode
+                      child: Icon(theme.isDarkMode
                           ? Icons.light_mode
-                          : Icons.dark_mode))
+                          : Icons.dark_mode)),
+                  PopupMenuButton<String>(
+                    onSelected: (String value) {
+                      _scrollController.scrollTo(
+                          index: int.parse(value),
+                          duration: const Duration(milliseconds: 800));
+                    },
+                    child: Container(
+                      height: 30,
+                      width: 60,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.white),
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Verse",
+                        style: TextStyle(
+                            color: Provider.of<ThemeProvider>(context,
+                                        listen: false)
+                                    .isDarkMode
+                                ? Colors.black
+                                : null,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    itemBuilder: (BuildContext context) => List.generate(
+                        Provider.of<VerseProvider>(context, listen: false)
+                            .verse
+                            .length, (index) {
+                      return PopupMenuItem<String>(
+                        value: index.toString(),
+                        child: Text((index + 1).toString()),
+                      );
+                    }),
+                  )
                 ],
               )
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void _showSettingsSheet(BuildContext context, ThemeProvider theme) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Text(theme.fontsSize,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: theme.fontSize)),
+            SfSlider(
+              min: 10,
+              max: 30,
+              value: theme.fontSize,
+              interval: 5,
+              showTicks: true,
+              showLabels: true,
+              activeColor: Theme.of(context).colorScheme.primary,
+              onChanged: (val) => theme.setFontSize(val),
+            ),
+            SwitchListTile(
+              title: Text(theme.darkTheme),
+              value: theme.isDarkMode,
+              onChanged: (_) => theme.toggleTheme(),
+              secondary: const Icon(Icons.dark_mode),
+            ),
+            const Divider(),
+            Text("Select Format",
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: theme.fontSize)),
+            _formatOption(theme, "Tamil followed by English", "tamilEnglish"),
+            _formatOption(theme, "English followed by Tamil", "englishTamil"),
+            _formatOption(theme, "Only Tamil", "onlyTamil"),
+            _formatOption(theme, "Only English", "onlyEnglish"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _formatOption(ThemeProvider theme, String label, String value) {
+    return RadioListTile(
+      value: value,
+      groupValue: theme.format,
+      onChanged: (val) => theme.setFormat(val!),
+      title: Text(label),
     );
   }
 
@@ -792,185 +919,119 @@ class _VersePageState extends State<VersePage> {
     }
   }
 
-  Column englishFollowedByEnglishWidget(VerseModel vm) {
-    return Column(
-      children: [
-        ListTile(
-          title: Text(
-            vm.verseNo.toString() + ") " + vm.verseEng!,
-            style: TextStyle(
-                color: vm.isSelected! ? Colors.orange : null,
-                fontWeight: FontWeight.bold),
-          ),
-        ),
-        Divider(),
-        ListTile(
-          title: Text(
-            vm.verseNo.toString() + ") " + vm.verseTam!,
-            style: TextStyle(
-                color: vm.isSelected! ? Colors.orange : null,
-                fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
-    );
-  }
-
-  ListTile onlyEnglishWidget(VerseModel vm) {
-    return ListTile(
-      title: Text(
-        vm.verseNo.toString() + ") " + vm.verseEng!,
-        style: TextStyle(
-            color: vm.isSelected! ? Colors.orange : null,
-            fontWeight: FontWeight.bold),
+  Widget tamilFollowedByEnglishWidget(VerseModel vm) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-    );
-  }
-
-  ListTile onlyTamilWidget(VerseModel vm) {
-    return ListTile(
-      title: Text(
-        vm.verseNo.toString() + ") " + vm.verseTam!,
-        style: TextStyle(
-            color: vm.isSelected! ? Colors.orange : null,
-            fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-}
-
-class BottomSettingsSheet extends StatelessWidget {
-  const BottomSettingsSheet({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, theme, child) => SizedBox(
-        height: 300,
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SingleChildScrollView(
-              physics: BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    theme.fontsSize,
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: theme.fontSize),
-                  ),
-                  SfSlider(
-                      min: 10,
-                      max: 30,
-                      value: theme.fontSize,
-                      onChanged: ((val) {
-                        theme.setFontSize(val);
-                      })),
-                  Row(
-                    children: [
-                      Text(
-                        theme.darkTheme,
-                        style: const TextStyle(fontSize: 15),
-                      ),
-                      const Spacer(),
-                      Switch(
-                          value: theme.isDarkMode,
-                          onChanged: ((val) {
-                            theme.toggleTheme();
-                          }))
-                    ],
-                  ),
-                  Text(
-                    'Select format',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: theme.fontSize),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      theme.setFormat('tamilEnglish');
-                    },
-                    leading: Radio(
-                        value: 'tamilEnglish',
-                        groupValue: theme.format,
-                        onChanged: (val) {
-                          theme.setFormat(val!);
-                        }),
-                    title: Text(
-                      'Tamil followed by English',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      theme.setFormat('englishTamil');
-                    },
-                    leading: Radio(
-                        value: 'englishTamil',
-                        groupValue: theme.format,
-                        onChanged: (val) {
-                          theme.setFormat(val!);
-                        }),
-                    title: Text(
-                      'English followed by Tamil',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      theme.setFormat('onlyTamil');
-                    },
-                    leading: Radio(
-                        value: 'onlyTamil',
-                        groupValue: theme.format,
-                        onChanged: (val) {
-                          theme.setFormat(val!);
-                        }),
-                    title: Text(
-                      'Only Tamil',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  ListTile(
-                    onTap: () {
-                      theme.setFormat('onlyEnglish');
-                    },
-                    leading: Radio(
-                        value: 'onlyEnglish',
-                        groupValue: theme.format,
-                        onChanged: (val) {
-                          theme.setFormat(val!);
-                        }),
-                    title: Text(
-                      'Only English',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
+      elevation: vm.isSelected! ? 4 : 1,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${vm.verseNo}) ${vm.verseTam!}",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: vm.isSelected! ? Colors.orange : null,
               ),
             ),
+            const SizedBox(height: 6),
+            Text(
+              "${vm.verseNo}) ${vm.verseEng!}",
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: vm.isSelected! ? Colors.orange : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget englishFollowedByTamilWidget(VerseModel vm) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: vm.isSelected! ? 4 : 1,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${vm.verseNo}) ${vm.verseEng!}",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: vm.isSelected! ? Colors.orange : null,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              "${vm.verseNo}) ${vm.verseTam!}",
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: vm.isSelected! ? Colors.orange : null,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget onlyEnglishWidget(VerseModel vm) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: vm.isSelected! ? 4 : 1,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Text(
+          "${vm.verseNo}) ${vm.verseEng!}",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: vm.isSelected! ? Colors.orange : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget onlyTamilWidget(VerseModel vm) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      elevation: vm.isSelected! ? 4 : 1,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Text(
+          "${vm.verseNo}) ${vm.verseTam!}",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: vm.isSelected! ? Colors.orange : null,
           ),
         ),
       ),
     );
   }
 }
+
 
 
 
