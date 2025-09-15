@@ -28,14 +28,19 @@ class DBHelper {
     });
   }
 
-  static Future<void> insertNote(
+  static Future<int> insertNote(
       String title, String content, String date) async {
+    print(content);
     final db = await database;
-    await db.insert('notes', {
-      'title': title,
-      'content': content,
-      'date': date,
-    });
+    return await db.insert(
+      'notes',
+      {
+        'title': title,
+        'content': content,
+        'date': date,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 
   static Future<void> updateNote(int id, String title, String content) async {

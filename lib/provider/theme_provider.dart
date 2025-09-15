@@ -9,6 +9,16 @@ class ThemeProvider extends ChangeNotifier {
   String _format = '';
   String get format => _format;
 
+  bool _showAppbar = true;
+
+  bool get showAppbar => _showAppbar;
+
+  set toggleAppBar(val) {
+    _showAppbar = val;
+    print(val);
+    notifyListeners();
+  }
+
   setFormat(String value) {
     setText(value);
     _format = value;

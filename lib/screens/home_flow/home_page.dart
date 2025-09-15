@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:holy_bible_tamil/data/constants.dart';
@@ -47,155 +45,138 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Consumer<ThemeProvider>(
-        builder: (context, theme, child) => Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                HomeTile(
-                  ontap: () {
+    return Consumer<ThemeProvider>(
+      builder: (context, theme, child) => Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: AutoSizeText(
+            '📖 ${theme.holyBibeName}',
+            maxFontSize: 15,
+            style: TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16),
+          child: GridView.count(
+            crossAxisCount: 2,
+            childAspectRatio: 1,
+            mainAxisSpacing: 16,
+            crossAxisSpacing: 16,
+            children: [
+              _homeTile(
+                context,
+                theme.oldTestamentName,
+                Icons.menu_book_rounded,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const BooksPage())),
+              ),
+              _homeTile(
+                context,
+                theme.newTestamentName,
+                Icons.menu_book,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const BooksPage(idx: 1))),
+              ),
+              _homeTile(
+                context,
+                theme.continueReadingName,
+                Icons.play_arrow_rounded,
+                () async {
+                  var data = await ContinueReadingService.getData();
+                  if (data == null) {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => const BooksPage()));
-                  },
-                  title: theme.holyBibeName,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    HomeTile(
-                      ontap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const BooksPage()));
-                      },
-                      title: theme.oldTestamentName,
-                    ),
-                    HomeTile(
-                      ontap: () async {
-                        var data = await ContinueReadingService.getData();
-                        if (data == null) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => VersePage(
-                                      isFromHome: true,
-                                      book: BooksModel(
-                                          bookNo: 1,
-                                          noOfBooks: 50,
-                                          nameT: "ஆதியாகமம்",
-                                          nameE: "Genesis"),
-                                      chapter: 1)));
-                        } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => VersePage(
-                                        isFromHome: true,
-                                        book: data["book"],
-                                        chapter: data["chapter"],
-                                        verseNo: data["verse"],
-                                      )));
-                        }
-                      },
-                      title: theme.continueReadingName,
-                    ),
-                    HomeTile(
-                      ontap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const BooksPage(
-                                      idx: 1,
-                                    )));
-                      },
-                      title: theme.newTestamentName,
-                    ),
-                  ],
-                ),
-                HomeTile(
-                  ontap: () async {
+                            builder: (_) => VersePage(
+                                  isFromHome: true,
+                                  book: BooksModel(
+                                    bookNo: 1,
+                                    noOfBooks: 50,
+                                    nameT: "ஆதியாகமம்",
+                                    nameE: "Genesis",
+                                  ),
+                                  chapter: 1,
+                                )));
+                  } else {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => NotesHomePage()));
-                  },
-                  title: theme.takeNotes,
-                ),
-                HomeTile(
-                  ontap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const SearchPage()));
-                  },
-                  title: theme.searchName,
-                ),
-                HomeTile(
-                  ontap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const BookMarks()));
-                  },
-                  title: theme.bookmarkName,
-                ),
-                HomeTile(
-                  ontap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const SettingsPage()));
-                  },
-                  title: theme.settingsName,
-                ),
-              ],
-            ),
+                            builder: (_) => VersePage(
+                                  isFromHome: true,
+                                  book: data["book"],
+                                  chapter: data["chapter"],
+                                  verseNo: data["verse"],
+                                )));
+                  }
+                },
+              ),
+              _homeTile(
+                context,
+                theme.takeNotes,
+                Icons.note_alt_rounded,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => NotesHomePage())),
+              ),
+              _homeTile(
+                context,
+                theme.searchName,
+                Icons.search_rounded,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const SearchPage())),
+              ),
+              _homeTile(
+                context,
+                theme.bookmarkName,
+                Icons.bookmark_rounded,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const BookMarks())),
+              ),
+              _homeTile(
+                context,
+                theme.settingsName,
+                Icons.settings_rounded,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const SettingsPage())),
+              ),
+              _homeTile(
+                context,
+                'History',
+                Icons.history_rounded,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => RecentlyViewVersePage())),
+              ),
+            ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => RecentlyViewVersePage()));
-        },
-        child: Icon(Icons.history),
-      ),
     );
   }
-}
 
-class HomeTile extends StatelessWidget {
-  const HomeTile({
-    super.key,
-    required this.title,
-    required this.ontap,
-  });
-  final String title;
-  final Function() ontap;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _homeTile(
+      BuildContext context, String title, IconData icon, VoidCallback ontap) {
     return InkWell(
       onTap: ontap,
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * .15,
-        width: MediaQuery.of(context).size.height * .15,
-        child: Card(
-          child: Container(
-            alignment: Alignment.center,
-            child: AutoSizeText(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
+      borderRadius: BorderRadius.circular(16),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon,
+                  size: 40, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(height: 12),
+              AutoSizeText(
+                title,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                textAlign: TextAlign.center,
+                maxLines: 2,
               ),
-              textAlign: TextAlign.center,
-              maxFontSize: 14,
-            ),
+            ],
           ),
         ),
       ),

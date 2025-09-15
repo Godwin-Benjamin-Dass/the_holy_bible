@@ -44,86 +44,142 @@ class _NotesHomePageState extends State<NotesHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Provider.of<ThemeProvider>(context, listen: false);
+
     return Scaffold(
       appBar: PreferredSize(
-          preferredSize: Size(double.infinity, 70),
-          child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        preferredSize: const Size(double.infinity, 70),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
+            child: Row(
               children: [
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  children: [
-                    BackButton(),
-                    Tooltip(
-                        message:
-                            Provider.of<ThemeProvider>(context, listen: false)
-                                .myNotes,
-                        child: SizedBox(
-                          width: MediaQuery.sizeOf(context).width * .6,
-                          child: AutoSizeText(
-                            Provider.of<ThemeProvider>(context, listen: false)
-                                .myNotes,
-                            maxFontSize: 17,
-                            minFontSize: 17,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        )),
-                  ],
+                const BackButton(),
+                Tooltip(
+                  message: theme.myNotes,
+                  child: AutoSizeText(
+                    theme.myNotes,
+                    maxFontSize: 20,
+                    minFontSize: 18,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ],
             ),
-          )),
-      floatingActionButton: FloatingActionButton(
+          ),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openEditor(),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: Text(theme.newNotes),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       body: groupedNotes.isEmpty
           ? Center(
-              child: Text(Provider.of<ThemeProvider>(context, listen: false)
-                  .noNotesyet))
+              child: Card(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                elevation: 6,
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.note_alt_outlined,
+                        size: 60,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        theme.noNotesyet,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
           : ListView(
+              padding: const EdgeInsets.all(12.0),
               children: groupedNotes.entries.map((entry) {
-                return ExpansionTile(
-                  title: Text(entry.value[0]['title'].toString()),
-                  children: entry.value.map((note) {
-                    return ListTile(
-                      title: Text(
-                        note['content'],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 4),
+                      child: Text(
+                        entry.key, // Date
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 16,
+                        ),
                       ),
-                      subtitle: Text(
-                        note['date'],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.share),
-                            onPressed: () async {
-                              Share.share(
-                                  '${note['title']}\n\n${note['content']}');
-                            },
+                    ),
+                    ...entry.value.map((note) {
+                      return Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        elevation: 3,
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.all(12),
+                          title: Text(
+                            note['title'].isEmpty
+                                ? "(Untitled)"
+                                : note['title'],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () async {
-                              await DBHelper.deleteNote(note['id']);
-                              _loadNotes();
-                            },
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 6.0),
+                            child: Text(
+                              note['content'],
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14),
+                            ),
                           ),
-                        ],
-                      ),
-                      onTap: () => _openEditor(note: note),
-                    );
-                  }).toList(),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.share, size: 22),
+                                onPressed: () async {
+                                  Share.share(
+                                      '${note['title']}\n\n${note['content']}');
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete,
+                                    color: Theme.of(context).colorScheme.error),
+                                onPressed: () async {
+                                  await DBHelper.deleteNote(note['id']);
+                                  _loadNotes();
+                                },
+                              ),
+                            ],
+                          ),
+                          onTap: () => _openEditor(note: note),
+                        ),
+                      );
+                    }).toList(),
+                  ],
                 );
               }).toList(),
             ),
