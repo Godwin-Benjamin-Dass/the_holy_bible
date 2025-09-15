@@ -294,12 +294,12 @@ class _BookMarksState extends State<BookMarks> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(vm.verseTam ?? '',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: Provider.of<ThemeProvider>(context).fontSize)),
           const SizedBox(height: 6),
           Text("${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           Text(time, style: const TextStyle(color: Colors.grey)),
         ],
       );
@@ -308,12 +308,12 @@ class _BookMarksState extends State<BookMarks> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(vm.verseEng ?? '',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: Provider.of<ThemeProvider>(context).fontSize)),
           const SizedBox(height: 6),
           Text("${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           Text(time, style: const TextStyle(color: Colors.grey)),
         ],
       );
@@ -322,20 +322,20 @@ class _BookMarksState extends State<BookMarks> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(vm.verseTam ?? '',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: Provider.of<ThemeProvider>(context).fontSize)),
           const SizedBox(height: 6),
           Text("${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           const Divider(),
           Text(vm.verseEng ?? '',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: Provider.of<ThemeProvider>(context).fontSize)),
           const SizedBox(height: 6),
           Text("${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           Text(time, style: const TextStyle(color: Colors.grey)),
         ],
       );
@@ -344,16 +344,18 @@ class _BookMarksState extends State<BookMarks> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(vm.verseEng ?? '',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: Provider.of<ThemeProvider>(context).fontSize)),
           const SizedBox(height: 6),
           Text("${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
               style:
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           const Divider(),
           Text(vm.verseTam ?? '',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: Provider.of<ThemeProvider>(context).fontSize)),
           const SizedBox(height: 6),
           Text("${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!}",
               style:

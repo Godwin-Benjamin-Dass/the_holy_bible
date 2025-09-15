@@ -145,7 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 subtitle: const Text(
-                  "Enjoy the Ad free version of Offline Bible app.",
+                  "Pure Bible reading experience, no ads, no internet needed.",
                   style: TextStyle(fontSize: 14),
                 ),
               ),
