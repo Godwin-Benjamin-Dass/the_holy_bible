@@ -70,6 +70,7 @@ class _VersePageState extends State<VersePage> {
         _previousFirstIndex = firstVisibleItemIndex;
       }
     });
+    Provider.of<ThemeProvider>(context, listen: false).toggleAppBar = true;
   }
 
   bool showAppBar = true;
@@ -934,7 +935,7 @@ class _VersePageState extends State<VersePage> {
             Text(
               "${vm.verseNo}) ${vm.verseTam!}",
               style: TextStyle(
-                fontSize: 16,
+                fontSize: Provider.of<ThemeProvider>(context).fontSize,
                 fontWeight: FontWeight.bold,
                 color: vm.isSelected! ? Colors.orange : null,
               ),
@@ -943,7 +944,7 @@ class _VersePageState extends State<VersePage> {
             Text(
               "${vm.verseNo}) ${vm.verseEng!}",
               style: TextStyle(
-                fontSize: 15,
+                fontSize: Provider.of<ThemeProvider>(context).fontSize,
                 fontWeight: FontWeight.w500,
                 color: vm.isSelected! ? Colors.orange : null,
               ),
@@ -969,7 +970,7 @@ class _VersePageState extends State<VersePage> {
             Text(
               "${vm.verseNo}) ${vm.verseEng!}",
               style: TextStyle(
-                fontSize: 16,
+                fontSize: Provider.of<ThemeProvider>(context).fontSize,
                 fontWeight: FontWeight.bold,
                 color: vm.isSelected! ? Colors.orange : null,
               ),
@@ -978,7 +979,7 @@ class _VersePageState extends State<VersePage> {
             Text(
               "${vm.verseNo}) ${vm.verseTam!}",
               style: TextStyle(
-                fontSize: 15,
+                fontSize: Provider.of<ThemeProvider>(context).fontSize,
                 fontWeight: FontWeight.w500,
                 color: vm.isSelected! ? Colors.orange : null,
               ),
@@ -1001,7 +1002,7 @@ class _VersePageState extends State<VersePage> {
         child: Text(
           "${vm.verseNo}) ${vm.verseEng!}",
           style: TextStyle(
-            fontSize: 16,
+            fontSize: Provider.of<ThemeProvider>(context).fontSize,
             fontWeight: FontWeight.bold,
             color: vm.isSelected! ? Colors.orange : null,
           ),
@@ -1022,7 +1023,7 @@ class _VersePageState extends State<VersePage> {
         child: Text(
           "${vm.verseNo}) ${vm.verseTam!}",
           style: TextStyle(
-            fontSize: 16,
+            fontSize: Provider.of<ThemeProvider>(context).fontSize,
             fontWeight: FontWeight.bold,
             color: vm.isSelected! ? Colors.orange : null,
           ),
