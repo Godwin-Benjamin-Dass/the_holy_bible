@@ -37,7 +37,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Only upload the privacy policy file
-          path: privacy-policy.html
+          path: '.'
 
       - name: Deploy to GitHub Pages
         id: deployment
