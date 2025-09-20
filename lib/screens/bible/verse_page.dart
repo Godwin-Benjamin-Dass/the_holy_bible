@@ -663,11 +663,12 @@ class _VersePageState extends State<VersePage> {
                         message: getFormattedBookName(theme, widget.book),
                         child: InkWell(
                           onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) =>
-                                        ChaptersPage(book: widget.book)));
+                            if (widget.isFromnotes == false)
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) =>
+                                          ChaptersPage(book: widget.book)));
                           },
                           child: AutoSizeText(
                             getFormattedBookName(theme, widget.book),
