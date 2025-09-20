@@ -46,11 +46,10 @@ class _BooksPageState extends State<BooksPage> with TickerProviderStateMixin {
                       Tooltip(
                           message: theme.theHolyBibleName,
                           child: SizedBox(
-                            width: MediaQuery.sizeOf(context).width * .6,
+                            width: MediaQuery.sizeOf(context).width * .8,
                             child: AutoSizeText(
                               theme.theHolyBibleName,
-                              maxFontSize: 17,
-                              minFontSize: 17,
+                              maxLines: 2,
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                               ),

@@ -17,11 +17,11 @@ class RecentlyViewVersePage extends StatelessWidget {
       appBar: AppBar(
         title: AutoSizeText(
           theme.recentVerse,
-          maxFontSize: 20,
-          minFontSize: 18,
+          maxFontSize: 16,
+          minFontSize: 13,
+          maxLines: 1,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
-        centerTitle: true,
         elevation: 2,
       ),
       body: Consumer<VerseProvider>(
@@ -75,7 +75,17 @@ class RecentlyViewVersePage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                book.nameT ?? "",
+                                theme.format == 'onlyTamil'
+                                    ? book.nameT ?? ""
+                                    : theme.format == 'onlyEnglish'
+                                        ? book.nameE ?? ""
+                                        : theme.format == 'tamilEnglish'
+                                            ? (book.nameT ?? '') +
+                                                '/' +
+                                                (book.nameE ?? '')
+                                            : (book.nameE ?? '') +
+                                                '/' +
+                                                (book.nameT ?? ''),
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16),
                               ),

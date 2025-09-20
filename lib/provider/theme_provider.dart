@@ -119,6 +119,8 @@ class ThemeProvider extends ChangeNotifier {
   String get noNotesyet => _noNotesyet;
   String _languageSettings = "மொழி அமைப்புகள்";
   String get languageSettings => _languageSettings;
+  String _history = "வரலாறு";
+  String get history => _history;
   setText(textLangTheme) {
     if (textLangTheme == 'onlyTamil') {
       _holyBibeName = "பரிசுத்த வேதாகமம்";
@@ -153,6 +155,7 @@ class ThemeProvider extends ChangeNotifier {
       _newNotes = "புதிய குறிப்பு";
       _noNotesyet = "குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை";
       _languageSettings = "மொழி அமைப்புகள்";
+      _history = "வரலாறு";
     } else if (textLangTheme == 'onlyEnglish') {
       _holyBibeName = "The Holy Bible";
       _oldTestamentName = "Old\nTestament";
@@ -185,7 +188,8 @@ class ThemeProvider extends ChangeNotifier {
       _editNotes = "Edit Notes";
       _newNotes = "New Notes";
       _noNotesyet = "No Notes Yet";
-      _languageSettings = "மொழி அமைப்புகள்";
+      _languageSettings = "Language settings";
+      _history = "history";
     } else if (textLangTheme == 'tamilEnglish') {
       _holyBibeName = "பரிசுத்த வேதாகமம்/The Holy Bible";
       _oldTestamentName = "பழைய\nஏற்பாடு/Old\nTestament";
@@ -205,6 +209,7 @@ class ThemeProvider extends ChangeNotifier {
       _gotoVerse = "வசனத்திற்கு செல்லுங்கள்/Goto Verse";
       _remove = "அகற்று/ Remove";
       _addToBookMark = "புத்தகக் குறியில் சேர்க்கவும்/Add To Bookmark";
+      _recentVerse = "சமீபத்திய வசனம்/Recent Verse";
       _close = "மூடு/Close";
       _fontsSize = "எழுத்து அளவு/Font Size";
       _darkTheme = "இருட்டாக்கு/Dark Theme";
@@ -218,6 +223,7 @@ class ThemeProvider extends ChangeNotifier {
       _newNotes = "புதிய குறிப்பு/New Note";
       _noNotesyet = "குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை/No Nots Yet";
       _languageSettings = "மொழி அமைப்புகள்/Language Settings";
+      _history = "வரலாறு/History";
     } else {
       _holyBibeName = "The Holy Bible/பரிசுத்த வேதாகமம்";
       _oldTestamentName = "Old\nTestament/பழைய\nஏற்பாடு";
@@ -237,6 +243,7 @@ class ThemeProvider extends ChangeNotifier {
       _gotoVerse = "Goto Verse/வசனத்திற்கு செல்லுங்கள்";
       _remove = "Remove/அகற்று";
       _addToBookMark = "Add To Bookmark/புத்தகக் குறியில் சேர்க்கவும்";
+      _recentVerse = "Recent Verse/சமீபத்திய வசனம்";
       _close = "Close/மூடு";
       _fontsSize = "Font Size/எழுத்து அளவு";
       _darkTheme = "Dark Theme/இருட்டாக்கு";
@@ -250,6 +257,7 @@ class ThemeProvider extends ChangeNotifier {
       _newNotes = "New Note/புதிய குறிப்பு";
       _noNotesyet = "No Nots Yet/குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை";
       _languageSettings = "Language Settings/மொழி அமைப்புகள்";
+      _history = "History/வரலாறு";
     }
     notifyListeners();
   }

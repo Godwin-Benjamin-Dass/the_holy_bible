@@ -70,7 +70,9 @@ class _VersePageState extends State<VersePage> {
         _previousFirstIndex = firstVisibleItemIndex;
       }
     });
-    Provider.of<ThemeProvider>(context, listen: false).toggleAppBar = true;
+    Future.delayed(Duration.zero, () {
+      Provider.of<ThemeProvider>(context, listen: false).toggleAppBar = true;
+    });
   }
 
   bool showAppBar = true;
@@ -82,7 +84,6 @@ class _VersePageState extends State<VersePage> {
     if (!Provider.of<ThemeProvider>(context, listen: false).showAppbar) {
       Provider.of<ThemeProvider>(context, listen: false).toggleAppBar = true;
     }
-    // Add your logic here
   }
 
   void onScrollDown() {
@@ -90,7 +91,6 @@ class _VersePageState extends State<VersePage> {
     if (Provider.of<ThemeProvider>(context, listen: false).showAppbar) {
       Provider.of<ThemeProvider>(context, listen: false).toggleAppBar = false;
     }
-    // Add your logic here
   }
 
   final ItemPositionsListener itemPositionsListener =
@@ -197,136 +197,136 @@ class _VersePageState extends State<VersePage> {
       key: _key,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(120),
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            // Fade + Slide transition
-            return SlideTransition(
-              position: Tween<Offset>(
-                begin: const Offset(0.0, -0.2),
-                end: Offset.zero,
-              ).animate(animation),
-              child: FadeTransition(opacity: animation, child: child),
-            );
-          },
-          child: Provider.of<ThemeProvider>(context, listen: true).showAppbar
-              ? buildCustomAppBar(context, _key, widget.book)
-              : const SizedBox.shrink(key: ValueKey('empty-appbar')),
+        child: SafeArea(
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              // Fade + Slide transition
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0.0, -0.2),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: FadeTransition(opacity: animation, child: child),
+              );
+            },
+            child: Provider.of<ThemeProvider>(context, listen: true).showAppbar
+                ? buildCustomAppBar(context, _key, widget.book)
+                : const SizedBox.shrink(key: ValueKey('empty-appbar')),
+          ),
         ),
       ),
       // ignore: deprecated_member_use
       body: WillPopScope(
         onWillPop: _willPopCallback,
-        child: SafeArea(
-          child: Consumer<VerseProvider>(
-            builder: (context, verse, child) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: SwipeableVerseCard(
-                isSwipable: !widget.isFromnotes,
-                onSwipeLeft: () => nextChapter(),
-                onSwipeRight: () => previousChapter(),
-                child: ScrollablePositionedList.builder(
-                  padding: EdgeInsets.only(
-                    bottom: 100 + MediaQuery.of(context).padding.bottom,
-                  ),
-                  physics: ClampingScrollPhysics(),
-                  itemPositionsListener: itemPositionsListener,
-                  itemScrollController: _scrollController,
-                  itemCount: verse.verse.length,
-                  itemBuilder: (context, i) {
-                    VerseModel vm = verse.verse[i];
+        child: Consumer<VerseProvider>(
+          builder: (context, verse, child) => Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: SwipeableVerseCard(
+              isSwipable: !widget.isFromnotes,
+              onSwipeLeft: () => nextChapter(),
+              onSwipeRight: () => previousChapter(),
+              child: ScrollablePositionedList.builder(
+                padding: EdgeInsets.only(
+                  bottom: 100 + MediaQuery.of(context).padding.bottom,
+                ),
+                physics: ClampingScrollPhysics(),
+                itemPositionsListener: itemPositionsListener,
+                itemScrollController: _scrollController,
+                itemCount: verse.verse.length,
+                itemBuilder: (context, i) {
+                  VerseModel vm = verse.verse[i];
 
-                    return GestureDetector(
-                      onScaleStart: (details) {
-                        _baseScaleFactor =
-                            Provider.of<ThemeProvider>(context, listen: false)
-                                .fontSize;
-                      },
-                      onScaleUpdate: (details) {
-                        Provider.of<ThemeProvider>(context, listen: false)
-                            .setFontSize(_baseScaleFactor * details.scale);
-                      },
-                      onTap: () {
-                        vm.isSelected = !vm.isSelected!;
-                        if (vm.isSelected!) {
-                          copyVerse.add(vm);
-                        } else {
-                          copyVerse.remove(vm);
-                        }
-                        setState(() {});
-                      },
-                      onLongPress: () async {
-                        showDialog(
-                          context: context,
-                          builder: (ctx) => AlertDialog(
-                            // title: Text(howCanIhelpYou),
-                            content: Consumer<ThemeProvider>(
-                              builder: (context, theme, child) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  InkWell(
-                                    onTap: () async {
-                                      await Clipboard.setData(ClipboardData(
-                                              text:
-                                                  "${vm.verseTam!} ${widget.book.nameT} ${vm.chapter!}:${vm.verseNo!}"))
-                                          .then((value) {
-                                        Navigator.pop(context);
-                                      });
-                                    },
-                                    child: Text(theme.copy),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      BookMarkService.addBookMark(vm)
-                                          .then((value) {
-                                        Navigator.pop(context);
-                                      });
-                                    },
-                                    child: Text(theme.addToBookMark),
-                                  ),
-                                  SizedBox(
-                                    height: 10,
-                                  ),
-                                  InkWell(
-                                    onTap: () {
+                  return GestureDetector(
+                    onScaleStart: (details) {
+                      _baseScaleFactor =
+                          Provider.of<ThemeProvider>(context, listen: false)
+                              .fontSize;
+                    },
+                    onScaleUpdate: (details) {
+                      Provider.of<ThemeProvider>(context, listen: false)
+                          .setFontSize(_baseScaleFactor * details.scale);
+                    },
+                    onTap: () {
+                      vm.isSelected = !vm.isSelected!;
+                      if (vm.isSelected!) {
+                        copyVerse.add(vm);
+                      } else {
+                        copyVerse.remove(vm);
+                      }
+                      setState(() {});
+                    },
+                    onLongPress: () async {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          // title: Text(howCanIhelpYou),
+                          content: Consumer<ThemeProvider>(
+                            builder: (context, theme, child) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                InkWell(
+                                  onTap: () async {
+                                    await Clipboard.setData(ClipboardData(
+                                            text:
+                                                "${vm.verseTam!} ${widget.book.nameT} ${vm.chapter!}:${vm.verseNo!}"))
+                                        .then((value) {
                                       Navigator.pop(context);
-                                    },
-                                    child: Text(theme.close),
-                                  ),
-                                ],
-                              ),
+                                    });
+                                  },
+                                  child: Text(theme.copy),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    BookMarkService.addBookMark(vm)
+                                        .then((value) {
+                                      Navigator.pop(context);
+                                    });
+                                  },
+                                  child: Text(theme.addToBookMark),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text(theme.close),
+                                ),
+                              ],
                             ),
                           ),
-                        );
-                      },
-                      child: Consumer<ThemeProvider>(
-                        builder: (context, theme, child) => Card(
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                    color: Provider.of<ThemeProvider>(context,
-                                                listen: false)
-                                            .isDarkMode
-                                        ? Colors.white
-                                        : Colors.black)),
-                            child: theme.format == 'onlyTamil'
-                                ? onlyTamilWidget(vm)
-                                : theme.format == 'onlyEnglish'
-                                    ? onlyEnglishWidget(vm)
-                                    : theme.format == 'tamilEnglish'
-                                        ? tamilFollowedByEnglishWidget(vm)
-                                        : englishFollowedByTamilWidget(vm),
-                          ),
+                        ),
+                      );
+                    },
+                    child: Consumer<ThemeProvider>(
+                      builder: (context, theme, child) => Card(
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                  color: Provider.of<ThemeProvider>(context,
+                                              listen: false)
+                                          .isDarkMode
+                                      ? Colors.white
+                                      : Colors.black)),
+                          child: theme.format == 'onlyTamil'
+                              ? onlyTamilWidget(vm)
+                              : theme.format == 'onlyEnglish'
+                                  ? onlyEnglishWidget(vm)
+                                  : theme.format == 'tamilEnglish'
+                                      ? tamilFollowedByEnglishWidget(vm)
+                                      : englishFollowedByTamilWidget(vm),
                         ),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -670,8 +670,7 @@ class _VersePageState extends State<VersePage> {
                                         ChaptersPage(book: widget.book)));
                           },
                           child: AutoSizeText(
-                            getFormattedBookName(theme, widget.book) +
-                                ': ${chapter.toString()}',
+                            getFormattedBookName(theme, widget.book),
                             maxLines: 2,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -692,6 +691,14 @@ class _VersePageState extends State<VersePage> {
                     IconButton(
                         onPressed: () => previousChapter(),
                         icon: Icon(Icons.arrow_back_ios_new_rounded)),
+                  AutoSizeText(
+                    chapter.toString(),
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxFontSize: 13,
+                  ),
                   if (widget.isFromnotes == false)
                     IconButton(
                         onPressed: () => nextChapter(),
@@ -714,13 +721,16 @@ class _VersePageState extends State<VersePage> {
                   GestureDetector(
                       onTap: () => _showSettingsSheet(context, theme),
                       child: Icon(Icons.settings)),
-                  SfSlider(
-                      min: 10,
-                      max: 30,
-                      value: theme.fontSize,
-                      onChanged: ((val) {
-                        theme.setFontSize(val);
-                      })),
+                  SizedBox(
+                    width: MediaQuery.sizeOf(context).width * .43,
+                    child: SfSlider(
+                        min: 10,
+                        max: 30,
+                        value: theme.fontSize,
+                        onChanged: ((val) {
+                          theme.setFontSize(val);
+                        })),
+                  ),
                   GestureDetector(
                       onTap: () {
                         theme.toggleTheme();

@@ -40,7 +40,7 @@ class ChaptersPage extends StatelessWidget {
       body: GridView.builder(
           itemCount: book.noOfBooks,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3),
+              crossAxisCount: 4),
           itemBuilder: (ctx, i) {
             return Padding(
               padding: const EdgeInsets.all(8.0),
@@ -61,11 +61,8 @@ class ChaptersPage extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       (i + 1).toString(),
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize:
-                              Provider.of<ThemeProvider>(context, listen: false)
-                                  .fontSize),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
                     ),
                   ),
                 ),

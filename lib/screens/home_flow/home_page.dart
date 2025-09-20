@@ -140,7 +140,7 @@ class _HomePageState extends State<HomePage> {
               ),
               _homeTile(
                 context,
-                'History',
+                theme.history,
                 Icons.history_rounded,
                 () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => RecentlyViewVersePage())),
