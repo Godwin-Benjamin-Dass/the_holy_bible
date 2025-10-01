@@ -4,6 +4,23 @@ class ThemeService {
   static String appThemeKey = "_appTheme";
   static String fontSizeKey = "_fontSize";
   static String verseFormatKey = "_verseFormatTheme";
+  static String isFirstTimeKey = "_isFirstTime";
+
+  static Future setFirstTime(bool isFirstTime) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.setBool(isFirstTimeKey, isFirstTime);
+  }
+
+  static Future getFirstTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool? isFirstTime = prefs.getBool(isFirstTimeKey);
+    if (isFirstTime == null) {
+      await setFirstTime(false);
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   static Future setTheme(bool darkTheme) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

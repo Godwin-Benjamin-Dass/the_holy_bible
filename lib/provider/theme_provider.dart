@@ -121,6 +121,9 @@ class ThemeProvider extends ChangeNotifier {
   String get languageSettings => _languageSettings;
   String _history = "வரலாறு";
   String get history => _history;
+  String _AddToNotes = "Add To Notes";
+  String get AddToNotes => _AddToNotes;
+
   setText(textLangTheme) {
     if (textLangTheme == 'onlyTamil') {
       _holyBibeName = "பரிசுத்த வேதாகமம்";
@@ -156,6 +159,7 @@ class ThemeProvider extends ChangeNotifier {
       _noNotesyet = "குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை";
       _languageSettings = "மொழி அமைப்புகள்";
       _history = "வரலாறு";
+      _AddToNotes = "குறிப்புகளில் சேர்";
     } else if (textLangTheme == 'onlyEnglish') {
       _holyBibeName = "The Holy Bible";
       _oldTestamentName = "Old\nTestament";
@@ -190,6 +194,7 @@ class ThemeProvider extends ChangeNotifier {
       _noNotesyet = "No Notes Yet";
       _languageSettings = "Language settings";
       _history = "history";
+      _AddToNotes = "Add To Notes";
     } else if (textLangTheme == 'tamilEnglish') {
       _holyBibeName = "பரிசுத்த வேதாகமம்/The Holy Bible";
       _oldTestamentName = "பழைய\nஏற்பாடு/Old\nTestament";
@@ -221,9 +226,10 @@ class ThemeProvider extends ChangeNotifier {
       _myNotes = "என் குறிப்புகள்/My Notes";
       _editNotes = "குறிப்பைத் திருத்து/Edit Notes";
       _newNotes = "புதிய குறிப்பு/New Note";
-      _noNotesyet = "குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை/No Nots Yet";
+      _noNotesyet = "குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை/No Notes Yet";
       _languageSettings = "மொழி அமைப்புகள்/Language Settings";
       _history = "வரலாறு/History";
+      _AddToNotes = "குறிப்புகளில் சேர்/Add To Notes";
     } else {
       _holyBibeName = "The Holy Bible/பரிசுத்த வேதாகமம்";
       _oldTestamentName = "Old\nTestament/பழைய\nஏற்பாடு";
@@ -255,9 +261,10 @@ class ThemeProvider extends ChangeNotifier {
       _myNotes = "My Notes/என் குறிப்புகள்";
       _editNotes = "Edit Notes/குறிப்பைத் திருத்து";
       _newNotes = "New Note/புதிய குறிப்பு";
-      _noNotesyet = "No Nots Yet/குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை";
+      _noNotesyet = "No Notes Yet/குறிப்புகள் இன்னும் சேர்க்கப்படவில்லை";
       _languageSettings = "Language Settings/மொழி அமைப்புகள்";
       _history = "History/வரலாறு";
+      _AddToNotes = "Add To Notes/குறிப்புகளில் சேர்";
     }
     notifyListeners();
   }

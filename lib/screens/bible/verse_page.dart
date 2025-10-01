@@ -11,8 +11,10 @@ import 'package:holy_bible_tamil/provider/theme_provider.dart';
 import 'package:holy_bible_tamil/provider/verse_provider.dart';
 import 'package:holy_bible_tamil/screens/bible/chapters_page.dart';
 import 'package:holy_bible_tamil/screens/home_flow/home_page.dart';
+import 'package:holy_bible_tamil/screens/notes_flow/note_editor_page.dart';
 import 'package:holy_bible_tamil/service.dart/book_mark_service.dart';
 import 'package:holy_bible_tamil/service.dart/continue_reading_service.dart';
+import 'package:holy_bible_tamil/service.dart/db_helper.dart';
 import 'package:holy_bible_tamil/widgets/drawer_list.dart';
 import 'package:holy_bible_tamil/widgets/swipeable_verse_card.dart';
 import 'package:provider/provider.dart';
@@ -175,6 +177,16 @@ class _VersePageState extends State<VersePage> {
 
   int chapter = 0;
   final GlobalKey<ScaffoldState> _key = GlobalKey();
+  Map<String, List<Map<String, dynamic>>> groupedNotes = {};
+  Future<void> _loadNotes() async {
+    final notes = await DBHelper.getNotes();
+    groupedNotes.clear();
+    for (var note in notes) {
+      String date = note['date'];
+      groupedNotes.putIfAbsent(date, () => []).add(note);
+    }
+    setState(() {});
+  }
 
   final ItemScrollController _scrollController = ItemScrollController();
   List<VerseModel> copyVerse = [];
@@ -497,56 +509,329 @@ class _VersePageState extends State<VersePage> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Consumer<ThemeProvider>(
-                      builder: (context, theme, child) => FloatingActionButton(
-                          heroTag: "btn_3",
-                          onPressed: () async {
-                            String copyString = "";
-                            if (theme.format == 'onlyTamil') {
-                              for (var vm in copyVerse) {
-                                copyString += "${vm.verseNo!} ${vm.verseTam}";
-                                copyString += "\n";
+                      builder: (context, theme, child) => Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          FloatingActionButton(
+                            heroTag: "btn_46",
+                            onPressed: () async {
+                              String copyString = "";
+                              if (theme.format == 'onlyTamil') {
+                                for (var vm in copyVerse) {
+                                  copyString += "${vm.verseNo!} ${vm.verseTam}";
+                                  copyString += "\n";
+                                }
+                                copyString +=
+                                    "${widget.book.nameT}:${copyVerse.first.chapter!}";
                               }
-                              copyString +=
-                                  "${widget.book.nameT}:${copyVerse.first.chapter!}";
-                            }
-                            if (theme.format == 'onlyEnglish') {
-                              for (var vm in copyVerse) {
-                                copyString += "${vm.verseNo!} ${vm.verseEng}";
-                                copyString += "\n";
+                              if (theme.format == 'onlyEnglish') {
+                                for (var vm in copyVerse) {
+                                  copyString += "${vm.verseNo!} ${vm.verseEng}";
+                                  copyString += "\n";
+                                }
+                                copyString +=
+                                    "${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
                               }
-                              copyString +=
-                                  "${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
-                            }
-                            if (theme.format == 'tamilEnglish') {
-                              for (var vm in copyVerse) {
-                                copyString += "${vm.verseNo!} ${vm.verseTam}";
-                                copyString += "\n";
-                                copyString += "${vm.verseEng}";
-                                copyString += "\n";
+                              if (theme.format == 'tamilEnglish') {
+                                for (var vm in copyVerse) {
+                                  copyString += "${vm.verseNo!} ${vm.verseTam}";
+                                  copyString += "\n";
+                                  copyString += "${vm.verseEng}";
+                                  copyString += "\n";
+                                }
+                                copyString +=
+                                    "${widget.book.nameT}/${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
                               }
-                              copyString +=
-                                  "${widget.book.nameT}/${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
-                            }
-                            if (theme.format == 'englishTamil') {
-                              for (var vm in copyVerse) {
-                                copyString += "${vm.verseNo!} ${vm.verseEng}";
-                                copyString += "\n";
-                                copyString += "${vm.verseTam}";
-                                copyString += "\n";
+                              if (theme.format == 'englishTamil') {
+                                for (var vm in copyVerse) {
+                                  copyString += "${vm.verseNo!} ${vm.verseEng}";
+                                  copyString += "\n";
+                                  copyString += "${vm.verseTam}";
+                                  copyString += "\n";
+                                }
+                                copyString +=
+                                    "${getBookNameEng(widget.book.bookNo!)}/${widget.book.nameT}:${copyVerse.first.chapter!}";
                               }
-                              copyString +=
-                                  "${getBookNameEng(widget.book.bookNo!)}/${widget.book.nameT}:${copyVerse.first.chapter!}";
-                            }
-                            Share.share(copyString);
+                              await _loadNotes();
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(theme.AddToNotes),
+                                                Spacer(),
+                                                if (groupedNotes.isNotEmpty)
+                                                  IconButton(
+                                                      onPressed: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (_) =>
+                                                                NoteEditorPage(
+                                                              verseFromOtherPage:
+                                                                  copyString,
+                                                            ),
+                                                          ),
+                                                        ).then((val) {
+                                                          for (var vm
+                                                              in Provider.of<
+                                                                          VerseProvider>(
+                                                                      context,
+                                                                      listen:
+                                                                          false)
+                                                                  .verse) {
+                                                            vm.isSelected =
+                                                                false;
+                                                          }
+                                                          setState(() {});
+                                                          Navigator.pop(
+                                                              context);
+                                                        });
+                                                      },
+                                                      icon: Icon(Icons.add))
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  .5,
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  .7,
+                                              child: groupedNotes.isEmpty
+                                                  ? Center(
+                                                      child: IconButton(
+                                                          onPressed: () {
+                                                            Navigator.push(
+                                                              context,
+                                                              MaterialPageRoute(
+                                                                builder: (_) =>
+                                                                    NoteEditorPage(
+                                                                  verseFromOtherPage:
+                                                                      copyString,
+                                                                ),
+                                                              ),
+                                                            ).then((val) {
+                                                              for (var vm in Provider.of<
+                                                                          VerseProvider>(
+                                                                      context,
+                                                                      listen:
+                                                                          false)
+                                                                  .verse) {
+                                                                vm.isSelected =
+                                                                    false;
+                                                              }
+                                                              setState(() {});
+                                                              Navigator.pop(
+                                                                  context);
+                                                            });
+                                                          },
+                                                          icon:
+                                                              Icon(Icons.add)),
+                                                    )
+                                                  : ListView(
+                                                      shrinkWrap: true,
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              12.0),
+                                                      children: groupedNotes
+                                                          .entries
+                                                          .map((entry) {
+                                                        return Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .symmetric(
+                                                                      vertical:
+                                                                          8,
+                                                                      horizontal:
+                                                                          4),
+                                                              child: Text(
+                                                                entry
+                                                                    .key, // Date
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                  fontSize: 16,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            ...entry.value
+                                                                .map((note) {
+                                                              return Card(
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              16),
+                                                                ),
+                                                                elevation: 3,
+                                                                margin: const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical:
+                                                                        6),
+                                                                child: ListTile(
+                                                                  contentPadding:
+                                                                      const EdgeInsets
+                                                                          .all(
+                                                                          12),
+                                                                  title: Text(
+                                                                    note['title']
+                                                                            .isEmpty
+                                                                        ? "(Untitled)"
+                                                                        : note[
+                                                                            'title'],
+                                                                    maxLines: 1,
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
+                                                                    style:
+                                                                        const TextStyle(
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                      fontSize:
+                                                                          16,
+                                                                    ),
+                                                                  ),
+                                                                  subtitle:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        top:
+                                                                            6.0),
+                                                                    child: Text(
+                                                                      note[
+                                                                          'content'],
+                                                                      maxLines:
+                                                                          2,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      style: const TextStyle(
+                                                                          fontSize:
+                                                                              14),
+                                                                    ),
+                                                                  ),
+                                                                  onTap: () {
+                                                                    Navigator
+                                                                        .push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                          builder: (_) => NoteEditorPage(
+                                                                              verseFromOtherPage: copyString,
+                                                                              note: note)),
+                                                                    ).then(
+                                                                        (val) {
+                                                                      for (var vm in Provider.of<VerseProvider>(
+                                                                              context,
+                                                                              listen: false)
+                                                                          .verse) {
+                                                                        vm.isSelected =
+                                                                            false;
+                                                                      }
+                                                                      setState(
+                                                                          () {});
+                                                                      Navigator.pop(
+                                                                          context);
+                                                                    });
+                                                                  },
+                                                                ),
+                                                              );
+                                                            }).toList(),
+                                                          ],
+                                                        );
+                                                      }).toList(),
+                                                    ),
+                                            ),
+                                            TextButton(
+                                              child: Text(theme.close),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                            )
+                                          ],
+                                        ),
+                                      ));
+                            },
+                            child: Icon(Icons.edit),
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          FloatingActionButton(
+                              heroTag: "btn_34",
+                              onPressed: () async {
+                                String copyString = "";
+                                if (theme.format == 'onlyTamil') {
+                                  for (var vm in copyVerse) {
+                                    copyString +=
+                                        "${vm.verseNo!} ${vm.verseTam}";
+                                    copyString += "\n";
+                                  }
+                                  copyString +=
+                                      "${widget.book.nameT}:${copyVerse.first.chapter!}";
+                                }
+                                if (theme.format == 'onlyEnglish') {
+                                  for (var vm in copyVerse) {
+                                    copyString +=
+                                        "${vm.verseNo!} ${vm.verseEng}";
+                                    copyString += "\n";
+                                  }
+                                  copyString +=
+                                      "${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
+                                }
+                                if (theme.format == 'tamilEnglish') {
+                                  for (var vm in copyVerse) {
+                                    copyString +=
+                                        "${vm.verseNo!} ${vm.verseTam}";
+                                    copyString += "\n";
+                                    copyString += "${vm.verseEng}";
+                                    copyString += "\n";
+                                  }
+                                  copyString +=
+                                      "${widget.book.nameT}/${getBookNameEng(widget.book.bookNo!)}:${copyVerse.first.chapter!}";
+                                }
+                                if (theme.format == 'englishTamil') {
+                                  for (var vm in copyVerse) {
+                                    copyString +=
+                                        "${vm.verseNo!} ${vm.verseEng}";
+                                    copyString += "\n";
+                                    copyString += "${vm.verseTam}";
+                                    copyString += "\n";
+                                  }
+                                  copyString +=
+                                      "${getBookNameEng(widget.book.bookNo!)}/${widget.book.nameT}:${copyVerse.first.chapter!}";
+                                }
+                                Share.share(copyString);
 
-                            for (var vm in Provider.of<VerseProvider>(context,
-                                    listen: false)
-                                .verse) {
-                              vm.isSelected = false;
-                            }
-                            setState(() {});
-                          },
-                          child: const Icon(Icons.share)),
+                                for (var vm in Provider.of<VerseProvider>(
+                                        context,
+                                        listen: false)
+                                    .verse) {
+                                  vm.isSelected = false;
+                                }
+                                setState(() {});
+                              },
+                              child: const Icon(Icons.share)),
+                        ],
+                      ),
                     ),
                     SizedBox(
                       height: 10,

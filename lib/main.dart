@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:holy_bible_tamil/provider/books_provider.dart';
 import 'package:holy_bible_tamil/provider/theme_provider.dart';
 import 'package:holy_bible_tamil/provider/verse_provider.dart';
+import 'package:holy_bible_tamil/screens/splash_screen/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import 'screens/home_flow/home_page.dart';
 
 void main() {
   runApp(MultiProvider(providers: [
@@ -61,7 +60,7 @@ class _MyAppState extends State<MyApp> {
                                   ? Colors.white
                                   : Colors.black))),
                   debugShowCheckedModeBanner: false,
-                  home: const HomePage());
+                  home: const SplashScreen());
             }),
           );
   }

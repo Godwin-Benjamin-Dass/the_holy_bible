@@ -5,9 +5,12 @@ import 'package:holy_bible_tamil/data/constants.dart';
 import 'package:holy_bible_tamil/models/books_model.dart';
 import 'package:holy_bible_tamil/models/verse_model.dart';
 import 'package:holy_bible_tamil/provider/theme_provider.dart';
+import 'package:holy_bible_tamil/provider/verse_provider.dart';
 import 'package:holy_bible_tamil/screens/bible/verse_page.dart';
 import 'package:holy_bible_tamil/screens/home_flow/home_page.dart';
+import 'package:holy_bible_tamil/screens/notes_flow/note_editor_page.dart';
 import 'package:holy_bible_tamil/service.dart/book_mark_service.dart';
+import 'package:holy_bible_tamil/service.dart/db_helper.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
@@ -31,6 +34,17 @@ class _BookMarksState extends State<BookMarks> {
   Future<void> getData() async {
     bookMarks = await BookMarkService.getList();
     bookMarks = bookMarks.reversed.toList();
+    setState(() {});
+  }
+
+  Map<String, List<Map<String, dynamic>>> groupedNotes = {};
+  Future<void> _loadNotes() async {
+    final notes = await DBHelper.getNotes();
+    groupedNotes.clear();
+    for (var note in notes) {
+      String date = note['date'];
+      groupedNotes.putIfAbsent(date, () => []).add(note);
+    }
     setState(() {});
   }
 
@@ -261,6 +275,197 @@ class _BookMarksState extends State<BookMarks> {
                   getData();
                   Navigator.pop(context);
                 });
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: Text(theme.AddToNotes),
+              onTap: () async {
+                String verseString = '';
+                if (theme.format == 'tamilEnglish') {
+                  verseString =
+                      '${vm.verseTam}\n ${getBookName(vm.book!)} ${vm.chapter!}:${vm.verseNo!} \n\n ${vm.verseEng}\n ${getBookNameEng(vm.book!)} ${vm.chapter!}:${vm.verseNo!} ';
+                } else if (theme.format == 'englishTamil') {
+                  verseString =
+                      '${vm.verseEng}\n ${getBookNameEng(vm.book!)}\n ${vm.chapter}\n ${vm.verseNo}\n\n ${vm.verseTam}\n ${getBookName(vm.book!)}\n ${vm.chapter}\n ${vm.verseNo}';
+                } else if (theme.format == 'onlyTamil') {
+                  verseString =
+                      '${vm.verseTam}\n ${getBookName(vm.book!)}\n ${vm.chapter}\n ${vm.verseNo}';
+                } else if (theme.format == 'onlyEnglish') {
+                  verseString =
+                      '${vm.verseEng}\n ${getBookNameEng(vm.book!)}\n ${vm.chapter}\n ${vm.verseNo}';
+                }
+                await _loadNotes();
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(theme.AddToNotes),
+                                  Spacer(),
+                                  if (groupedNotes.isNotEmpty)
+                                    IconButton(
+                                        onPressed: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => NoteEditorPage(
+                                                verseFromOtherPage: verseString,
+                                              ),
+                                            ),
+                                          ).then((val) {
+                                            for (var vm
+                                                in Provider.of<VerseProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .verse) {
+                                              vm.isSelected = false;
+                                            }
+                                            setState(() {});
+                                            Navigator.pop(context);
+                                          });
+                                        },
+                                        icon: Icon(Icons.add))
+                                ],
+                              ),
+                              SizedBox(
+                                height: MediaQuery.of(context).size.height * .5,
+                                width: MediaQuery.of(context).size.width * .7,
+                                child: groupedNotes.isEmpty
+                                    ? Center(
+                                        child: IconButton(
+                                            onPressed: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      NoteEditorPage(
+                                                    verseFromOtherPage:
+                                                        verseString,
+                                                  ),
+                                                ),
+                                              ).then((val) {
+                                                for (var vm in Provider.of<
+                                                            VerseProvider>(
+                                                        context,
+                                                        listen: false)
+                                                    .verse) {
+                                                  vm.isSelected = false;
+                                                }
+                                                setState(() {});
+                                                Navigator.pop(context);
+                                              });
+                                            },
+                                            icon: Icon(Icons.add)),
+                                      )
+                                    : ListView(
+                                        shrinkWrap: true,
+                                        padding: const EdgeInsets.all(12.0),
+                                        children:
+                                            groupedNotes.entries.map((entry) {
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 8,
+                                                        horizontal: 4),
+                                                child: Text(
+                                                  entry.key, // Date
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                              ...entry.value.map((note) {
+                                                return Card(
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            16),
+                                                  ),
+                                                  elevation: 3,
+                                                  margin: const EdgeInsets
+                                                      .symmetric(vertical: 6),
+                                                  child: ListTile(
+                                                    contentPadding:
+                                                        const EdgeInsets.all(
+                                                            12),
+                                                    title: Text(
+                                                      note['title'].isEmpty
+                                                          ? "(Untitled)"
+                                                          : note['title'],
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                    subtitle: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 6.0),
+                                                      child: Text(
+                                                        note['content'],
+                                                        maxLines: 2,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: const TextStyle(
+                                                            fontSize: 14),
+                                                      ),
+                                                    ),
+                                                    onTap: () {
+                                                      Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder: (_) =>
+                                                                NoteEditorPage(
+                                                                    verseFromOtherPage:
+                                                                        verseString,
+                                                                    note:
+                                                                        note)),
+                                                      ).then((val) {
+                                                        for (var vm in Provider
+                                                                .of<VerseProvider>(
+                                                                    context,
+                                                                    listen:
+                                                                        false)
+                                                            .verse) {
+                                                          vm.isSelected = false;
+                                                        }
+                                                        setState(() {});
+                                                        Navigator.pop(context);
+                                                      });
+                                                    },
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ],
+                                          );
+                                        }).toList(),
+                                      ),
+                              ),
+                              TextButton(
+                                child: Text(theme.close),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              )
+                            ],
+                          ),
+                        ));
               },
             ),
           ],

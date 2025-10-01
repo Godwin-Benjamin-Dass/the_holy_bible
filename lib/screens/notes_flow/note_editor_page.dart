@@ -1,5 +1,6 @@
 // pages/note_editor_page.dart
 import 'dart:async';
+import 'dart:developer';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:holy_bible_tamil/data/constants.dart';
@@ -14,9 +15,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+// ignore: must_be_immutable
 class NoteEditorPage extends StatefulWidget {
-  final Map<String, dynamic>? note;
-  const NoteEditorPage({super.key, this.note});
+  Map<String, dynamic>? note;
+  final String? verseFromOtherPage;
+  NoteEditorPage({super.key, this.note, this.verseFromOtherPage});
 
   @override
   State<NoteEditorPage> createState() => _NoteEditorPageState();
@@ -36,6 +39,14 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
       isEditing = true;
       _titleController.text = widget.note!['title'] ?? '';
       _contentController.text = widget.note!['content'] ?? '';
+
+      if (widget.verseFromOtherPage != null) {
+        _contentController.text =
+            _contentController.text + "\n\n" + widget.verseFromOtherPage!;
+      }
+    } else {
+      _contentController.text = widget.verseFromOtherPage ?? '';
+      _autoSave();
     }
 
     // Auto-save listeners
@@ -59,7 +70,12 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
       await DBHelper.updateNote(widget.note!['id'], title, content);
     } else {
       int newId = await DBHelper.insertNote(title, content, date);
+      log(newId.toString());
+      if (widget.note == null) {
+        widget.note = {};
+      }
       widget.note?['id'] = newId;
+      log(widget.note.toString());
       isEditing = true;
     }
 
